@@ -1,0 +1,2 @@
+# GGpy
+GGI automatization
