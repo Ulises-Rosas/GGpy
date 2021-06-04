@@ -249,7 +249,7 @@ class GGI(Raxml, Consel):
             outname = "extended_hypothesis_" + self.suffix
             with open(outname, "w") as f:
                 for v in self.translation.values():
-                    f.write("%s\n" % v['extended'])
+                    f.write("%s\t%s\n" % (v['group'], v['extended']))
 
             sys.stderr.write("\nExtended hypothesis written at '%s'\n" % outname)
             sys.stderr.flush()

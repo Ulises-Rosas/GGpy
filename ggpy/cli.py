@@ -56,7 +56,7 @@ def getOpts():
     parser.add_argument('-H','--hypothesis',
                         metavar="",
                         default = None,
-                        help='Pre-defined hypothesis file, either extended or not')
+                        help='[Optional] Pre-defined hypothesis file, either extended or not')
     parser.add_argument('-e','--extended',
                         action="store_true",
                         help='''[Optional] If selected, file with topologies contains
