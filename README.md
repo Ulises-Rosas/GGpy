@@ -15,8 +15,6 @@ python3 -m pip install .
 
 ```Bash
 ggpy demo/*fasta -t demo/tax_file.csv -H demo/myhypothesis.trees  
-```
-```Bash
 cat out_ggi.txt
 ```
 ```
