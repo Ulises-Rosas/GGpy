@@ -35,32 +35,28 @@ else:
     exit()
 
 
-# ext_modules = [
-#               Extension('fishlifeseq', sources= ["./ggpy/sequtils.c"], extra_compile_args=['-std=c99'])
-#               ]
-
 dependencies = ['dendropy==4.4.0']
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-setup(name="ggpy",
-      version='0.1.0',
-      maintainer='Ulises Rosas',
+setup(name = "ggpy",
+      version = '0.1.0',
+      maintainer = 'Ulises Rosas',
       long_description = readme,
-      long_description_content_type='text/markdown',
-      url='https://github.com/Ulises-Rosas/GGpy',
-      packages=['ggpy'],
-      package_data ={'ggpy': ['data/*']} ,
-    #   ext_modules=ext_modules,
+      long_description_content_type = 'text/markdown',
+      url ='https://github.com/Ulises-Rosas/GGpy',
+      packages = ['ggpy'],
+      package_data = {'ggpy': ['data/*']} ,
+      data_files = [ ('bin', bins) ],
       install_requires = dependencies,
       zip_safe = False,
-      entry_points={
+      entry_points = {
         'console_scripts': [
             'ggpy   = ggpy.cli:main'
             ]
         },
-      classifiers=[
+      classifiers = [
           'Programming Language :: Python :: 3'
       ]
     )
