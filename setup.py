@@ -55,7 +55,10 @@ setup(name = "ggpy",
         'console_scripts': [
             'ggpy   = ggpy.cli:main'
             ]
-        },
+      },
+      scripts=[
+          './scripts/root_groups.py',
+      ],
       classifiers = [
           'Programming Language :: Python :: 3'
       ]
