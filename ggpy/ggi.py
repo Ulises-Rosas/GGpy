@@ -178,7 +178,7 @@ class GGI(Raxml, Consel):
             # no hypothesis
             # to test
             self.close_files()
-            exit()
+            sys.exit(1)
 
         self.translation = hypothesis
 
@@ -224,7 +224,7 @@ class GGI(Raxml, Consel):
                         sys.stderr.write("than 8 groups is not currently available\n")
                         sys.stderr.flush()
                         self.close_files()
-                        exit()
+                        sys.exit(1)
 
                     ext_str += "rooted.tree"
                 else:
@@ -234,7 +234,7 @@ class GGI(Raxml, Consel):
                         sys.stderr.write("than 9 groups is not currently available\n")
                         sys.stderr.flush()
                         self.close_files()
-                        exit()
+                        sys.exit(1)
 
                     ext_str += "unrooted.tree"
 
@@ -253,7 +253,7 @@ class GGI(Raxml, Consel):
             sys.stderr.write("\nExtended hypothesis written at '%s'\n" % outname)
             sys.stderr.flush()
             self.close_files()
-            exit()
+            sys.exit(0)
 
         # attempt to reduce mem usage
         self.__save_trees__(self.translation)
@@ -502,8 +502,12 @@ class GGI(Raxml, Consel):
                 sys.stdout.flush()
 
                 self.export_translation()
+                self.close_files()
+            else:
 
-        self.close_files()
+                self.close_files()
+                sys.exit(1)
+                
 
 # tests ----------------------#
 # import glob
