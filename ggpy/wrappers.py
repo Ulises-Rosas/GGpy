@@ -36,6 +36,7 @@ class Consel:
                  makermt_exe = MAKERMT,
                  consel_exe  = CONSEL,
                  catpv_exe   = CATPV,
+                 codon_partition = True, 
                  out_report = "au_tests.csv",
                  threads     = 1):
 
@@ -48,11 +49,11 @@ class Consel:
         self.consel_exe  = consel_exe
         self.catpv_exe   = catpv_exe
 
+        self.codon_partition = codon_partition
         self.threads  = threads
         self.evomodel = evomodel
 
-    @staticmethod
-    def remove_undetermined_chars(seq_file: str, outname: str) -> None:
+    def remove_undetermined_chars(self, seq_file: str, outname: str) -> None:
         """
         RAxML does not allow to have site likehoods for sites 
         without data. Sites completely empty are posible when
@@ -60,7 +61,7 @@ class Consel:
         out of three could be recovered from given sequences.
         """
         in_aln  = fas_to_dic(seq_file)
-        out_aln = close_gaps(in_aln, is_codon_aware=False)
+        out_aln = close_gaps(in_aln, is_codon_aware=self.codon_partition, model=self.evomodel)
         export_fasta(aln = out_aln, outname=outname)
 
     def _site_likehood(self, seq_tree, suffix, error_file):

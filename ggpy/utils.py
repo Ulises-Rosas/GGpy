@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import subprocess
 
@@ -138,18 +139,18 @@ def _get_gap_prop(aln: dict, seqlength: int, offset: int)-> dict:
 def _seq_length(aln:dict)-> int:
     return len(next(iter(aln.values())))
 
-def convertN2Gap(aln: dict) -> dict:
-    """
-    `Missingdata.convertN2Gap` is used as
-    both aligner and `self.filter_stopcodons` add "N"s.
-    Used once if called from other module (e.g.,`monophyly.py`)
-    """
+def convertMissing2Gap(aln: dict, isprot = False) -> dict:
+
     for k,v in aln.items():
-        aln[k] = v.replace("N", "-")
+        if isprot:
+            aln[k] = v.replace("X", "-")
+
+        else:
+            aln[k] = v.replace("N", "-")
 
     return aln
 
-def close_gaps(aln: dict, is_codon_aware: bool = True) -> dict:
+def close_gaps(aln: dict, is_codon_aware: bool = True, model: str = 'GTRGAMM') -> dict:
     """
     Moves:
     1. It converts N to gaps
@@ -167,7 +168,7 @@ def close_gaps(aln: dict, is_codon_aware: bool = True) -> dict:
         return None
         
     offset    = 3 if is_codon_aware else 1
-    aln       = convertN2Gap(aln = aln)
+    aln       = convertMissing2Gap( aln = aln, isprot = re.findall('^PROT', model) )
     seqlength = _seq_length(aln)
 
     idxs = []

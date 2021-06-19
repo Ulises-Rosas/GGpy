@@ -51,7 +51,6 @@ class GGI(Raxml, Consel):
         ## --- shared variables --- #
         self.codon_partition = codon_partition
         self.evomodel = evomodel
-        self.codon_partition = codon_partition
         self.raxml_exe = raxml_exe
         self.iterations = iterations
 
