@@ -4,7 +4,6 @@ import argparse
 
 import csv
 import dendropy
-from multiprocessing import Pool
 
 def getOpts():
 
@@ -85,7 +84,13 @@ def main():
 
             root_mrca = from_tree.mrca(taxon_labels = outgroups)
             from_tree.reroot_at_edge(root_mrca.edge)
-            to_tree_str = from_tree.as_string(schema = 'newick').strip().replace("[&R] ", "")
+            to_tree_str = (from_tree
+                                .as_string(schema = 'newick')
+                                .strip()
+                                .replace("[&R] ", "")
+                                .replace("'", "")
+                            )
+                            
             row[2] = to_tree_str
 
             new_rows.append(row)

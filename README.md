@@ -101,3 +101,7 @@ optional arguments:
   -s , --suffix         [Optional] Suffix for each written file [Default:
                         ggi.txt]
 ```
+
+Utilities
+
+* `root_groups.py` : Root groups at ggpy results
