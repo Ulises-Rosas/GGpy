@@ -61,7 +61,7 @@ class Consel:
         out of three could be recovered from given sequences.
         """
         in_aln  = fas_to_dic(seq_file)
-        out_aln = close_gaps(in_aln, is_codon_aware=self.codon_partition, model=self.evomodel)
+        out_aln = close_gaps(in_aln, is_codon_aware=False, model=self.evomodel) # is_codon_aware=False: check column-by-column
         export_fasta(aln = out_aln, outname=outname)
 
     def _site_likehood(self, seq_tree, suffix, error_file):
