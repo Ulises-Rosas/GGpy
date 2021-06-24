@@ -2,7 +2,7 @@
 
 import sys
 import platform
-# import setuptools
+import setuptools
 from distutils.core import setup
 
 if platform.architecture()[0] != '64bit':
@@ -40,11 +40,11 @@ dependencies = ['dendropy==4.4.0']
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-setup(name = "ggpy",
-      version = '0.1.0',
+setup(name = "ggi",
+      version = '0.5.1',
       maintainer = 'Ulises Rosas',
-      long_description = readme,
-      long_description_content_type = 'text/markdown',
+    #   long_description = readme,
+    #   long_description_content_type = 'text/markdown',
       url ='https://github.com/Ulises-Rosas/GGpy',
       packages = ['ggpy'],
       package_data = {'ggpy': ['data/*']} ,

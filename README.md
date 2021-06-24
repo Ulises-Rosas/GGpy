@@ -1,13 +1,23 @@
-# GGpy
+# GGpy: 
 
 GGI automatization
 
+Software requierements:
+
+* pip
+
 ## Installation
 
-Get the development version:
+Using `pip`:
 
 ```Bash
-git clone https://github.com/Ulises-Rosas/GGpy.git && cd GGpy
+pip install ggi
+```
+
+Development version by using `git` and `pip` (optional):
+```Bash
+git clone https://github.com/Ulises-Rosas/GGpy.git
+cd GGpy
 python3 -m pip install .
 ```
 
