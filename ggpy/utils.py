@@ -1,7 +1,10 @@
 import os
 import re
 import sys
+import operator
 import subprocess
+
+
 
 def runshell(args, type = ""):
     
@@ -64,7 +67,69 @@ def remove_files(files):
         except FileNotFoundError:
             pass
 
-def codon_partitions(file, outname = None, nexus = True):
+def check_empty_positions(aln, file, outname):
+    # file = '/Users/ulises/Desktop/GOL/software/GGpy/demo/toggi/E1644.fasta_2_ggi.tsv'
+    # aln = fas_to_dic(file)
+    gap_chars = set(['N', '-', '!', '?'])
+    seq_len = len(next(iter(aln.values())))
+
+    all_char_pos1 = set()
+    all_char_pos2 = set()
+    all_char_pos3 = set()
+
+    for v in aln.values():
+        for p in range(0, seq_len, 3):
+            all_char_pos1.update(v[p])
+            all_char_pos2.update(v[p + 1])
+            all_char_pos3.update(v[p + 2])
+
+    is_pos1_empty = not (all_char_pos1 - gap_chars)
+    is_pos2_empty = not (all_char_pos2 - gap_chars)
+    is_pos3_empty = not (all_char_pos3 - gap_chars)
+
+    all_empty = is_pos1_empty and is_pos2_empty and is_pos3_empty
+    all_filled = not is_pos1_empty and not is_pos2_empty and not is_pos3_empty
+
+    if all_empty:
+        sys.stderr.write("'%s' file has only gap characters\n" % file)
+        sys.stderr.flush()
+        sys.exit(1)
+
+    if all_filled:
+        return False
+
+    new_aln = {}
+    for k,v in aln.items():
+        mystr = ""
+        for i in range(0, seq_len, 3):
+
+            F = '' if is_pos1_empty else v[i]
+            S = '' if is_pos2_empty else v[i + 1]
+            T = '' if is_pos3_empty else v[i + 2]
+            mystr += (F + S + T)
+
+        new_aln[k] = mystr
+    
+    seq_new_len = len(next(iter(new_aln.values())))
+
+    filled = 3 - sum([is_pos1_empty, is_pos2_empty, is_pos3_empty])
+    with open(outname, 'w') as outf:
+        for i in range(filled):
+            outf.write(
+                "DNA, p{pos} = {pos}-{seq_len}\\{npart}\n".format(
+                    pos = i + 1,
+                    seq_len = seq_new_len,
+                    npart = filled
+                )
+            )
+    
+    with open(file, 'w') as f:
+        for k,v in new_aln.items():
+            f.write( "%s\n%s\n" % (k,v))
+            
+    return True
+
+def codon_partitions(file, outname = None):
 
     aln = fas_to_dic(file)
     lengths = set([len(v) for _,v in aln.items()])
@@ -72,26 +137,19 @@ def codon_partitions(file, outname = None, nexus = True):
     if lengths.__len__() > 1:
         sys.stderr.write("'%s' file has sequences with different lengths\n" % file)
         sys.stderr.flush()
-        return file
+        sys.exit(1)
 
+    procesed = check_empty_positions(aln, file, outname)
+
+    if procesed:
+        return None
+    
     aln_length = lengths.pop()
-
-    if not outname:
-        outname  = file + ".nex" 
-        
-    if nexus:
-        with open(outname, 'w') as outf:
-            outf.write("#nexus\n")
-            outf.write("begin sets;\n")
-            outf.write("\tcharset pos_1 = %s: 1-%s\\3;\n" % (file, aln_length))
-            outf.write("\tcharset pos_2 = %s: 2-%s\\3;\n" % (file, aln_length))
-            outf.write("\tcharset pos_3 = %s: 3-%s\\3;\n" % (file, aln_length))
-            outf.write("end;\n")
-    else:
-        with open(outname, 'w') as outf:
-            outf.write("DNA, p1 = 1-%s\\3\n" % aln_length)
-            outf.write("DNA, p2 = 2-%s\\3\n" % aln_length)
-            outf.write("DNA, p3 = 3-%s\\3\n" % aln_length)
+    
+    with open(outname, 'w') as outf:
+        outf.write("DNA, p1 = 1-%s\\3\n" % aln_length)
+        outf.write("DNA, p2 = 2-%s\\3\n" % aln_length)
+        outf.write("DNA, p3 = 3-%s\\3\n" % aln_length)
 
     return None
 

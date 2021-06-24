@@ -410,6 +410,7 @@ class GGI(Raxml, Consel):
         return out_cols
 
     def ggi_iterator(self, file):
+        # file = '/Users/ulises/Desktop/GOL/software/GGpy/demo/toggi/E1644.fasta'
         seq_basename = os.path.basename(file)
 
         sys.stdout.write("Processing: '%s' \n" % seq_basename)
@@ -515,9 +516,10 @@ class GGI(Raxml, Consel):
 
 # self = GGI(
 #     sequences=sequences,
-#     taxonomyfile='/Users/ulises/Desktop/GOL/software/GGpy/demo/tax_file.csv',
+#     taxonomyfile='/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv',
 #     topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
 #     write_extended= False,
+#     codon_partition=True,
 #     iterations=1
 #     )
 

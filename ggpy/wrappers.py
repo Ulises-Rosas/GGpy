@@ -307,7 +307,7 @@ class Raxml:
                                                       seq, run_id)
 
         for pr_id,metadata in pr_message.items():
-            # pruned_str,metadata
+            # pr_id,metadata
             pruned_str = metadata['pruned']
 
             seq2   = "%s_%s_%s" % (seq, pr_id, run_id)
@@ -328,7 +328,7 @@ class Raxml:
             if self.codon_partition:
                     part_out      = seq2 + ".partitions"
                     partition_cmd = "-q %s" % part_out
-                    codon_partitions(file = seq2, outname = part_out, nexus = False)
+                    codon_partitions(file = seq2, outname = part_out)
 
             else:
                 partition_cmd = ""
@@ -341,7 +341,6 @@ class Raxml:
                     -s {seq}    \
                     {partitions}\
                     -n {suffix} \
-                    -T {threads}\
                     --silent    \
                     -N {runs}""".format(
                         raxml      = self.raxml_exe,
@@ -350,7 +349,6 @@ class Raxml:
                         seq        = seq2,
                         partitions = partition_cmd,
                         suffix     = suffix,
-                        threads    = 1,
                         runs       = self.iterations
                     ).strip()
             # print(cmd)

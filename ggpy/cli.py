@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-from ggpy.ggi import GGI
+
 
 def getOpts():
 
@@ -113,6 +113,8 @@ def getOpts():
 
 def main():
     args = getOpts()
+    
+    from ggpy.ggi import GGI
     # print(args)
     GGI(
         sequences       = args.filenames,
