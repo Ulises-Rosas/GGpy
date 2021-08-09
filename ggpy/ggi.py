@@ -1,5 +1,6 @@
 
 import os
+import re
 import sys
 import csv
 import ggpy
@@ -337,7 +338,15 @@ class GGI(Raxml, Consel):
                                    self.suffix)
         
     def site_likelihoods(self, cons_message, aln_f):
+        """
+        constraints are sent 
+        ordered in functions of keys\\
 
+        keys are ordered in functions
+        of row lines in the
+        translation file
+        """
+        # cons_message, aln_f = cons_message, file 
         if not cons_message:
             return None
 
@@ -345,29 +354,15 @@ class GGI(Raxml, Consel):
         whole_constrs_f = aln_f + "_AllCons_" + self.suffix
         
         # join constrains
-        sll_meta   = {}
         cons_trees = []
-        to_rm      = []
-
-        count  = 1
         # order matters
-        for k,v in cons_message.items():
-
+        for i in range(len(cons_message)):
+            v = cons_message[ i + 1 ]
             with open( v['constrained'], 'r' ) as c:
                 cons_trees.append( c.read() )
-            to_rm.append( v['constrained'] )
-
-            sll_meta[count] = {
-                 'id'    : k, # tree id
-                 'group' : v['group']
-                }
-
-            count += 1
 
         with open( whole_constrs_f, "w") as f:
             f.writelines(cons_trees)
-
-        remove_files(to_rm)
 
         sll_f = self._site_likehood(
                         (aln_f, whole_constrs_f),
@@ -376,9 +371,31 @@ class GGI(Raxml, Consel):
                 )
 
         if sll_f:
-            return (sll_f, sll_meta)
+            return (sll_f, cons_message)
+            # return (sll_f, sll_meta)
         else:
             return None
+
+    def keep_rank1_tree(self, au_table, sll_meta):
+        to_rm = []
+        rank1 = ''
+
+        for rank, item, _ in au_table:
+            item_int = int(item)
+
+            if rank != '1':
+                to_rm.append(
+
+                    sll_meta[item_int]['constrained']
+                )
+
+            else:
+                rank1 += sll_meta[item_int]['constrained']
+
+        new_name = re.sub(self.suffix, self.suffix + "_rank1", rank1)
+
+        os.rename(rank1, new_name)
+        remove_files(to_rm)
 
     def au_tests(self, sll_message, seq_basename):
 
@@ -392,14 +409,15 @@ class GGI(Raxml, Consel):
         if not au_table:
             return None
 
+        self.keep_rank1_tree(au_table, sll_meta)
+
         out_cols = []
-        
         for row in au_table:
+            item    = int(row[1])
 
             rank    = row[0]
-            item    = int(row[1])
             au_test = row[2]
-            tree_id = sll_meta[item]['id']
+            tree_id = item
             group   = sll_meta[item]['group']
 
             out_cols.append([
@@ -410,7 +428,7 @@ class GGI(Raxml, Consel):
         return out_cols
 
     def ggi_iterator(self, file):
-        # file = '/Users/ulises/Desktop/GOL/software/GGpy/demo/toggi/E1644.fasta'
+        # file = self.sequences[0]
         seq_basename = os.path.basename(file)
 
         sys.stdout.write("Processing: '%s' \n" % seq_basename)
@@ -512,14 +530,20 @@ class GGI(Raxml, Consel):
 
 # tests ----------------------#
 # import glob
-# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/*.fasta")
+# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/ggpy/*.fas")
+# # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
+
 
 # self = GGI(
 #     sequences=sequences,
-#     taxonomyfile='/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv',
-#     topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
+#     # taxonomyfile=None,
+#     taxonomyfile="/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv",
+#     topologies= "/Users/ulises/Desktop/BAL/GGI_flatfishes/tests/all_constraints_hypos.trees",
+#     # topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
 #     write_extended= False,
-#     codon_partition=True,
+#     # are_extended = False,
+#     are_extended = True,
+#     codon_partition=False,
 #     iterations=1
 #     )
 

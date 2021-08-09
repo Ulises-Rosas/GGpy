@@ -42,13 +42,13 @@ def getOpts():
 
         $ %(prog)s [exon files] -t [taxonomy file] -H [file with topologies]
             
-            note: `-h` accepts a group-based topologies
+            note: `-H` accepts a group-based topologies
 
     * Specify pre-defined extended hypothesis:
 
-        $ %(prog)s [exon files] -t [taxonomy file] -H [file with topologies] -e
+        $ %(prog)s [exon files] -H [file with topologies] -e
 
-            note: `-e` specifies that topologies at `-h` files are 
+            note: `-e` specifies that topologies at `-H` files are 
                   extended (i.e., with actual species and not groups)
 
 """)
@@ -104,7 +104,7 @@ def getOpts():
     main_args.add_argument('-t','--tax_file',
                         metavar="",
                         default = None,
-                        required= True,
+                        # required= True,
                         help='Taxonomy file. Format in csv: "[sequence name],[group]"')                                    
 
     parser._action_groups.reverse()
