@@ -81,7 +81,7 @@ usage: ggpy [-h] [-H] [-e] [-w] [-r] [-n] [-s] [-E] [-c] [-i] -t
 
     * Specify pre-defined extended hypothesis:
 
-        $ ggpy [exon files] -t [taxonomy file] -H [file with topologies] -e
+        $ ggpy [exon files] -H [file with topologies] -e
 
             note: `-e` specifies that topologies at `-h` files are 
                   extended (i.e., with actual species and not groups)
