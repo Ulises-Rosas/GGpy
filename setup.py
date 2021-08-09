@@ -41,7 +41,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name = "ggi",
-      version = '0.5.1',
+      version = '0.6.0',
       maintainer = 'Ulises Rosas',
     #   long_description = readme,
     #   long_description_content_type = 'text/markdown',
