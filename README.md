@@ -5,16 +5,11 @@ GGI automatization
 Software requierements:
 
 * pip
+* git
 
 ## Installation
 
-Using `pip`:
-
-```Bash
-pip install ggi
-```
-
-Development version by using `git` and `pip` (optional):
+Development version by using `git` and `pip`:
 ```Bash
 git clone https://github.com/Ulises-Rosas/GGpy.git
 cd GGpy
