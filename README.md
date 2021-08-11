@@ -16,7 +16,7 @@ pip install git+https://github.com/ulises-rosas/GGpy.git
 ```
 
 
-Using `git` and `pip`:
+Using `git` and `pip` (Optional):
 ```Bash
 git clone https://github.com/Ulises-Rosas/GGpy.git
 cd GGpy
