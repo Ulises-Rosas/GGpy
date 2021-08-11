@@ -5,9 +5,16 @@ GGI automatization
 Software requierements:
 
 * pip
-* git
+
 
 ## Installation
+
+Using `pip`:
+
+```Bash
+pip install git+https://github.com/ulises-rosas/GGpy.git 
+```
+
 
 Development version by using `git` and `pip`:
 ```Bash
