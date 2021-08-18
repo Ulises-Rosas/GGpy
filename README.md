@@ -6,15 +6,17 @@ Software requierements:
 
 * pip
 
+
 ## Installation
 
 Using `pip`:
 
 ```Bash
-pip install ggi
+pip install git+https://github.com/ulises-rosas/GGpy.git 
 ```
 
-Development version by using `git` and `pip` (optional):
+
+Using `git` and `pip` (Optional):
 ```Bash
 git clone https://github.com/Ulises-Rosas/GGpy.git
 cd GGpy
