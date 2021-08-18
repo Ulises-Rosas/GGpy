@@ -154,6 +154,10 @@ class GGI(Raxml, Consel):
             for i in f.readlines():
 
                 tmp_hypothesis = i.strip()
+
+                if not tmp_hypothesis:
+                    continue
+
                 str_taxa = self._taxa_from_str(tmp_hypothesis)
 
                 new_groups = set(str_taxa) - groups
@@ -378,7 +382,7 @@ class GGI(Raxml, Consel):
 
     def keep_rank1_tree(self, au_table, sll_meta):
         to_rm = []
-        rank1 = ''
+        s_item = 0
 
         for rank, item, _ in au_table:
             item_int = int(item)
@@ -390,8 +394,16 @@ class GGI(Raxml, Consel):
                 )
 
             else:
-                rank1 += sll_meta[item_int]['constrained']
+                s_item += item_int
+                # rank1 += sll_meta[item_int]['constrained']
 
+        rank1 = sll_meta[s_item]['constrained']
+        # seq = sll_meta[s_item]['aln']
+        # self.add_bootstrap(
+        #     seq = seq, 
+        #     selected_tree = rank1,
+        #     suffix = self.suffix
+        # )
         new_name = re.sub(self.suffix, self.suffix + "_rank1", rank1)
 
         os.rename(rank1, new_name)
@@ -529,23 +541,23 @@ class GGI(Raxml, Consel):
                 
 
 # tests ----------------------#
-# import glob
-# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/ggpy/*.fas")
-# # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
+import glob
+sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/LOC*.fas")
+# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
 
 
-# self = GGI(
-#     sequences=sequences,
-#     # taxonomyfile=None,
-#     taxonomyfile="/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv",
-#     topologies= "/Users/ulises/Desktop/BAL/GGI_flatfishes/tests/all_constraints_hypos.trees",
-#     # topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
-#     write_extended= False,
-#     # are_extended = False,
-#     are_extended = True,
-#     codon_partition=False,
-#     iterations=1
-#     )
+self = GGI(
+    sequences=sequences,
+    # taxonomyfile=None,
+    taxonomyfile="/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv",
+    topologies= "/Users/ulises/Desktop/BAL/GGI_flatfishes/tests/all_constraints_hypos.trees",
+    # topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
+    write_extended= False,
+    # are_extended = False,
+    are_extended = True,
+    codon_partition=False,
+    iterations=1
+    )
 
 # self._set_extended_hypothesis()
 # tests ----------------------#

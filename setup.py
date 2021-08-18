@@ -41,7 +41,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name = "ggi",
-      version = '0.6.0',
+      version = '1.0.0',
       maintainer = 'Ulises Rosas',
     #   long_description = readme,
     #   long_description_content_type = 'text/markdown',
@@ -49,6 +49,7 @@ setup(name = "ggi",
       packages = ['ggpy'],
       package_data = {'ggpy': ['data/*']} ,
       data_files = [ ('bin', bins) ],
+      include_package_data=True,
       install_requires = dependencies,
       zip_safe = False,
       entry_points = {
