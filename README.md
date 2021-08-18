@@ -12,7 +12,7 @@ Software requierements:
 Using `pip`:
 
 ```Bash
-pip install git+https://github.com/ulises-rosas/GGpy.git 
+pip install ggi
 ```
 
 
