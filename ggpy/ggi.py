@@ -541,23 +541,23 @@ class GGI(Raxml, Consel):
                 
 
 # tests ----------------------#
-import glob
-sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/LOC*.fas")
-# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
+# import glob
+# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/LOC*.fas")
+# # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
 
 
-self = GGI(
-    sequences=sequences,
-    # taxonomyfile=None,
-    taxonomyfile="/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv",
-    topologies= "/Users/ulises/Desktop/BAL/GGI_flatfishes/tests/all_constraints_hypos.trees",
-    # topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
-    write_extended= False,
-    # are_extended = False,
-    are_extended = True,
-    codon_partition=False,
-    iterations=1
-    )
+# self = GGI(
+#     sequences=sequences,
+#     # taxonomyfile=None,
+#     taxonomyfile="/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv",
+#     topologies= "/Users/ulises/Desktop/BAL/GGI_flatfishes/tests/all_constraints_hypos.trees",
+#     # topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
+#     write_extended= False,
+#     # are_extended = False,
+#     are_extended = True,
+#     codon_partition=False,
+#     iterations=1
+#     )
 
 # self._set_extended_hypothesis()
 # tests ----------------------#
