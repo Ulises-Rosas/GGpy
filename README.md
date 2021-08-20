@@ -1,4 +1,4 @@
-# GGpy: 
+# GGpy
 
 GGI automatization
 
@@ -23,7 +23,7 @@ cd GGpy
 python3 -m pip install .
 ```
 
-## Usage
+## GGI
 
 ```Bash
 ggpy demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees  
@@ -36,6 +36,8 @@ E0055.fasta     2       (Outgroup,((Eso_salmo,Argentiniformes),(Osme_Stomia,(Gal
 E1532.fasta     2       (Outgroup,((Eso_salmo,Argentiniformes),(Osme_Stomia,(Galaxiiformes,Neoteleostei))));    1       0.922
 E1532.fasta     1       (Outgroup,(Eso_salmo,(Argentiniformes,(Osme_Stomia,(Galaxiiformes,Neoteleostei)))));    2       0.078
 ```
+
+Helping page:
 
 ```Bash
 ggpy -h
@@ -117,3 +119,7 @@ optional arguments:
 Utilities
 
 * `root_groups.py` : Root groups at ggpy results
+
+## post-GGI
+
+
