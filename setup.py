@@ -2,8 +2,8 @@
 
 import sys
 import platform
-import setuptools
-from distutils.core import setup
+from setuptools import setup
+# from distutils.core import setup
 
 if platform.architecture()[0] != '64bit':
     sys.stderr.write('Architecture requires 64bit')
@@ -35,13 +35,22 @@ else:
     exit()
 
 
-dependencies = ['dendropy==4.4.0']
+dependencies = [
+    "fishlifetraits>=0.4.2", # own package
+    'dendropy==4.4.0',
+    'shap',
+    'joblib',
+    'xgboost',
+    'pandas',
+    'sklearn',
+    'matplotlib',
+]
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name = "ggi",
-      version = '1.0.1',
+      version = '1.1.1',
       maintainer = 'Ulises Rosas',
     #   long_description = readme,
     #   long_description_content_type = 'text/markdown',
