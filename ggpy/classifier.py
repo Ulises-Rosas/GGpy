@@ -14,15 +14,6 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.metrics import  accuracy_score, plot_confusion_matrix
 
-
-
-# file_comparisons = "/Users/ulises/Desktop/GOL/software/GGpy/demo/tree_id_comparisons.csv"
-# features_file = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/features_fstats_yongxin.tsv'
-# label_file    = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/ggi_h1_h3.tsv'
-# all_ggi_results = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/all_1693_ggi_nt.tsv'
-# model_prefix  = 'yongxin_h1_h3'
-# threads = 5
-
 # """
 # 1,2
 # 1,3
@@ -311,6 +302,13 @@ class Post_ggi:
         self.confusion_plots(mytables)
 
 # debugging --------------------------------------
+
+# file_comparisons = "/Users/ulises/Desktop/GOL/software/GGpy/demo/tree_id_comparisons.csv"
+# features_file = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/features_fstats_yongxin.tsv'
+# label_file    = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/ggi_h1_h3.tsv'
+# all_ggi_results = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/all_907_ggi_fishlife.tsv'
+# model_prefix  = 'yongxin_h1_h3'
+# threads = 5
 
 # self = Post_ggi(
 #     features_file = features_file,

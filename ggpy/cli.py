@@ -190,7 +190,7 @@ fstats.add_argument('-n', '--threads',
 # fstats -----------------------------------------------------------------------
 
 # post_ggi --------------------------------------------------------------------------
-post_ggi_sub = subparsers.add_parser('post', help = "Classification of GGI hypothesis",
+post_ggi_sub = subparsers.add_parser('post', help = "Classification of GGI hypothesis based on features",
                               formatter_class = argparse.RawDescriptionHelpFormatter, 
                               description="""
                               
