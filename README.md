@@ -12,7 +12,7 @@ Software requierements:
 Using `pip`:
 
 ```Bash
-pip install numpy # needed when python is < 3.7
+pip install numpy # needed for python<3.7
 pip install ggi
 ```
 
@@ -21,7 +21,7 @@ Using `git` and `pip` (Optional):
 ```Bash
 git clone https://github.com/Ulises-Rosas/GGpy.git
 cd GGpy
-python3 -m pip install numpy # needed when python < 3.7
+python3 -m pip install numpy # needed for python<3.7
 python3 -m pip install .
 ```
 
