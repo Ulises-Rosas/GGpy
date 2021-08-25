@@ -5,6 +5,7 @@ GGI automatization
 Software requierements:
 
 * pip
+* python3
 
 
 ## Installation
