@@ -12,7 +12,7 @@ Software requierements:
 Using `pip`:
 
 ```Bash
-pip install numpy # needed when python < 3.7
+pip install numpy # needed when python is < 3.7
 pip install ggi
 ```
 
