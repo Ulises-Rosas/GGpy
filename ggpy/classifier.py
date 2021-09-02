@@ -267,28 +267,42 @@ class Post_ggi:
 
         cnf_mx_filename = "cnf_mx_%s.png" % self.model_prefix
 
-        if len(self.tree_id_comp) <= 3:
-            nrows = 1
-            self.cnf_ncols = len(self.tree_id_comp)
-            
-        else:
-            res = len(mytables) % self.cnf_ncols
-            nrows = (len(mytables) // self.cnf_ncols) + bool(res)
+        if len(self.tree_id_comp)  <= 1:
 
-        f,axes = plt.subplots(nrows = nrows, ncols = self.cnf_ncols, figsize=(18, 5), dpi = 400)
-        for i in range(len(mytables)):
-            X, y,_groups_dict,xgb_clf_no_nor,title = mytables[i]
-
+            X, y,_groups_dict,xgb_clf_no_nor,title = mytables[0]
             plot_confusion_matrix(
                 xgb_clf_no_nor, X, y,
                 values_format  = 'd',
-                display_labels = [_groups_dict[i] for i in xgb_clf_no_nor.classes_],
-                ax = axes[i]
+                display_labels = [_groups_dict[i] for i in xgb_clf_no_nor.classes_]
             )
-            axes[i].set_title(title, fontsize = 20)
+            # axes[i].set_title(title, fontsize = 20)
+            plt.savefig(cnf_mx_filename, bbox_inches = 'tight')
+            plt.close()
+            
 
-        plt.savefig(cnf_mx_filename, bbox_inches = 'tight')
-        plt.close()
+        else: 
+            if len(self.tree_id_comp) <= 3:
+                nrows = 1
+                self.cnf_ncols = len(self.tree_id_comp)
+                
+            else:
+                res = len(mytables) % self.cnf_ncols
+                nrows = (len(mytables) // self.cnf_ncols) + bool(res)
+
+            f,axes = plt.subplots(nrows = nrows, ncols = self.cnf_ncols, figsize=(18, 5), dpi = 400)
+            for i in range(len(mytables)):
+                X, y,_groups_dict,xgb_clf_no_nor,title = mytables[i]
+
+                plot_confusion_matrix(
+                    xgb_clf_no_nor, X, y,
+                    values_format  = 'd',
+                    display_labels = [_groups_dict[i] for i in xgb_clf_no_nor.classes_],
+                    ax = axes[i]
+                )
+                axes[i].set_title(title, fontsize = 20)
+
+            plt.savefig(cnf_mx_filename, bbox_inches = 'tight')
+            plt.close()
 
     def xgboost_iterator(self):
 
@@ -303,15 +317,13 @@ class Post_ggi:
 
 # debugging --------------------------------------
 
-# file_comparisons = "/Users/ulises/Desktop/GOL/software/GGpy/demo/tree_id_comparisons.csv"
-# features_file = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/features_fstats_yongxin.tsv'
-# label_file    = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/ggi_h1_h3.tsv'
-# all_ggi_results = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/all_907_ggi_fishlife.tsv'
-# model_prefix  = 'yongxin_h1_h3'
+# file_comparisons = "/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/ggi_9hypos_comparisons.txt"
+# features_file    = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/features_991exons_fishlife.tsv'
+# all_ggi_results  = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/all_907_ggi_fishlife_renamed.tsv'
 # threads = 5
 
 # self = Post_ggi(
-#     features_file = features_file,
+#     feature_file = features_file,
 #     all_ggi_results = all_ggi_results,
 #     file_comparisons = file_comparisons,
 #     threads = 6
