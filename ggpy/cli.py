@@ -71,6 +71,13 @@ ggi.add_argument('-e','--extended',
                     action="store_true",
                     help='''[Optional] If selected, file with topologies contains
                     extended trees (i.e., species instead of groups)''')
+
+ggi.add_argument('-T','--parallel_gt',
+                    action="store_true",
+                    help='''[Optional] If selected, all cores are focused to one 
+                    alignment at a time instead of one core per alignment 
+                    (i.e., default strategy)''')
+
 ggi.add_argument('-w','--write_extended',
                     action="store_true",
                     help='''[Optional] If selected, extended topologies are written and exit''')
@@ -264,6 +271,7 @@ def main():
             threads         = wholeargs.threads,
             evomodel        = wholeargs.evomol,
             iterations      = wholeargs.iterations,
+            parallel_gt     = wholeargs.parallel_gt,
             write_extended  = wholeargs.write_extended,
             suffix          = wholeargs.suffix,
         ).main()

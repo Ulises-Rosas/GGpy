@@ -23,6 +23,7 @@ class GGI(Raxml, Consel):
                 rooted = False,
                 codon_partition = True, 
                 threads = 1,
+                parallel_gt = True,
 
                 evomodel = 'GTRGAMMA',
                 iterations = 10,
@@ -46,10 +47,14 @@ class GGI(Raxml, Consel):
 
 
         self.suffix = suffix
-        self.threads = threads
+        
 
 
         ## --- shared variables --- #
+        self.threads = threads
+        self.parallel_gt = parallel_gt
+
+
         self.codon_partition = codon_partition
         self.evomodel = evomodel
         self.raxml_exe = raxml_exe
@@ -501,16 +506,12 @@ class GGI(Raxml, Consel):
 
         sys.stdout.write("=> '%s' file was written\n" % self.trans_out)
         sys.stdout.flush()
-    
-    def main(self):
 
-        self.init_files()
+    def oneCore_gt(self):
 
+        preout = []
         with Pool(processes= self.threads) as p:
 
-            self._set_extended_hypothesis()
-
-            preout = []
             for fa in self.sequences:
                 result  = p.map_async(self.ggi_iterator, (fa,))
                 preout.append(result)
@@ -521,42 +522,69 @@ class GGI(Raxml, Consel):
                 if gotit:
                     out_cols.extend(gotit)
 
-            if len(out_cols ) > 1:    
-                sys.stdout.write("\n\n")
-                sys.stdout.flush()
+        return out_cols        
+    
+    def manyCore_gt(self):
 
-                with open(self.final_out, "w") as f:
-                    writer = csv.writer(f, delimiter = "\t")
-                    writer.writerows(out_cols)
+        # preout = []
+        out_cols = [["alignment", "tree_id", "group", "rank", "au_test"]]
+        for fa in self.sequences:
+            result = self.ggi_iterator(fa)
+            if result:
+                out_cols += result
 
-                sys.stdout.write("=> '%s' file was written\n" % self.final_out)
-                sys.stdout.flush()
+        return out_cols
 
-                self.export_translation()
-                self.close_files()
-            else:
+    def main(self):
 
-                self.close_files()
-                sys.exit(1)
+        self.init_files()
+        self._set_extended_hypothesis()
+
+        if not self.parallel_gt:
+            out_cols = self.oneCore_gt()
+
+        else:
+            out_cols = self.manyCore_gt()
+
+
+        if len(out_cols ) > 1:    
+            sys.stdout.write("\n\n")
+            sys.stdout.flush()
+
+            with open(self.final_out, "w") as f:
+                writer = csv.writer(f, delimiter = "\t")
+                writer.writerows(out_cols)
+
+            sys.stdout.write("=> '%s' file was written\n" % self.final_out)
+            sys.stdout.flush()
+
+            self.export_translation()
+            self.close_files()
+        else:
+
+            self.close_files()
+            sys.exit(1)
                 
 
 # tests ----------------------#
 # import glob
-# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/LOC*.fas")
-# # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
+# # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/LOC*.fas")
+# sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
 
 
 # self = GGI(
 #     sequences=sequences,
 #     # taxonomyfile=None,
 #     taxonomyfile="/Users/ulises/Desktop/GOL/software/GGpy/demo/ggi_tax_file.csv",
-#     topologies= "/Users/ulises/Desktop/BAL/GGI_flatfishes/tests/all_constraints_hypos.trees",
-#     # topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
+#     # topologies= "/Users/ulises/Desktop/BAL/GGI_flatfishes/tests/all_constraints_hypos.trees",
+#     topologies= "/Users/ulises/Desktop/GOL/software/GGpy/demo/myhypothesis.trees",
 #     write_extended= False,
 #     # are_extended = False,
-#     are_extended = True,
+#     are_extended = False,
 #     codon_partition=False,
-#     iterations=1
+#     iterations=1,
+#     threads= 2,
+#     parallel_gt=True
 #     )
 
 # self._set_extended_hypothesis()

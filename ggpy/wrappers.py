@@ -16,10 +16,10 @@ from ggpy.utils import (fas_to_dic,
 myos = sys.platform
 
 if myos == 'darwin':
-    RAXML = 'raxmlHPC-SSE3_Darwin_64bit'
+    RAXML = 'raxmlHPC-PTHREADS-SSE3_Darwin_64bit'
 
 elif myos == 'linux' or  myos == 'linux2':
-    RAXML = 'raxmlHPC-SSE3_Linux_64bit'
+    RAXML = 'raxmlHPC-PTHREADS-SSE3_Linux_64bit'
 
 
 SEQMT   = "seqmt"
@@ -38,7 +38,9 @@ class Consel:
                  catpv_exe   = CATPV,
                  codon_partition = True, 
                  out_report = "au_tests.csv",
-                 threads     = 1):
+                 threads     = 1,
+                 parallel_gt = False,
+                 ):
 
 
         self.out_report  = out_report
@@ -51,7 +53,12 @@ class Consel:
 
         self.codon_partition = codon_partition
         self.threads  = threads
+        self.parallel_gt = parallel_gt
         self.evomodel = evomodel
+
+    @property
+    def _adj_threads(self):
+        return self.threads if self.parallel_gt else 1
 
     def remove_undetermined_chars(self, seq_file: str, outname: str) -> None:
         """
@@ -107,7 +114,7 @@ class Consel:
                     model   = self.evomodel,
                     seq     = seq_gap_close,
                     constr  = tree_nHypos,
-                    threads = 1,
+                    threads = self._adj_threads,
                     suffix  = site_lnl_out_suffix).strip()
 
         # print(cmd)
@@ -223,13 +230,21 @@ class Raxml:
                 raxml_exe = RAXML,
                 evomodel = None,
                 iterations = None,
-                codon_partition = None
+                codon_partition = None,
+                threads = 1,
+                paralell_gt = False,
                 ):
 
         self.raxml_exe = raxml_exe
         self.evomodel = evomodel
         self.iterations = iterations
         self.codon_partition = codon_partition
+        self.threads = threads
+        self.parallel_gt = paralell_gt
+
+    @property
+    def _adj_threads(self):
+        return self.threads if self.parallel_gt else 1 
 
     def __remove_raxmlfs__(self, seq, seq_basename):
 
@@ -342,14 +357,16 @@ class Raxml:
                     {partitions}\
                     -n {suffix} \
                     --silent    \
-                    -N {runs}""".format(
+                    -N {runs}\
+                    -T {threads}""".format(
                         raxml      = self.raxml_exe,
                         pruned     = pruned,
                         model      = self.evomodel,
                         seq        = seq2,
                         partitions = partition_cmd,
                         suffix     = suffix,
-                        runs       = self.iterations
+                        runs       = self.iterations,
+                        threads    = self._adj_threads
                     ).strip()
             # print(cmd)
             runshell( ( cmd.split(), seq2 + ".stdout" ), type = "stdout" )

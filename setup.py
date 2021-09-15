@@ -15,7 +15,8 @@ myos = sys.platform
 
 if myos == 'darwin':
     bins = [
-        './ext_bin/raxml/raxmlHPC-SSE3_Darwin_64bit',
+        # './ext_bin/raxml/raxmlHPC-SSE3_Darwin_64bit',
+        './ext_bin/raxml/raxmlHPC-PTHREADS-SSE3_Darwin_64bit',
         './ext_bin/consel/darwin/seqmt',
         './ext_bin/consel/darwin/makermt',
         './ext_bin/consel/darwin/consel',
@@ -24,7 +25,8 @@ if myos == 'darwin':
 
 elif myos == 'linux' or myos == "linux2":
     bins = [
-        './ext_bin/raxml/raxmlHPC-SSE3_Linux_64bit',
+        # './ext_bin/raxml/raxmlHPC-SSE3_Linux_64bit',
+        './ext_bin/raxml/raxmlHPC-PTHREADS-SSE3_Linux_64bit',
         './ext_bin/consel/linux/seqmt',
         './ext_bin/consel/linux/makermt',
         './ext_bin/consel/linux/consel',
@@ -51,7 +53,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name = "ggi",
-      version = '1.1.3',
+      version = '1.1.4',
       maintainer = 'Ulises Rosas',
     #   long_description = readme,
     #   long_description_content_type = 'text/markdown',
