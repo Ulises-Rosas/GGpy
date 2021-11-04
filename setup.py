@@ -39,7 +39,7 @@ else:
 
 
 dependencies = [
-    "fishlifetraits", # own package
+    "fishlifetraits>=0.4.5", # own package
     'dendropy==4.4.0',
     'shap',
     'joblib',
@@ -53,7 +53,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name = "ggi",
-      version = '1.1.4',
+      version = '1.2.0',
       maintainer = 'Ulises Rosas',
     #   long_description = readme,
     #   long_description_content_type = 'text/markdown',

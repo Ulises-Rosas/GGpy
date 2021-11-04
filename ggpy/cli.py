@@ -169,7 +169,7 @@ fstats.add_argument('-t','--taxonomy',
                     metavar="",
                     type= str,
                     required=False,
-                    help='[Optional] Taxonomy file [Default: None]')                      
+                    help='[Optional] Taxonomy file is CSV (e.g., "[seq],[Group]") [Default: None]')                      
 # fstats.add_argument('-r','--reference',
 #                      metavar="",
 #                      type= str,

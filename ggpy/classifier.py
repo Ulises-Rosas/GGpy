@@ -89,6 +89,8 @@ class Post_ggi:
         subset tree_id_comp df
         by a tree_id
         """
+        ha,hb = tree_id_comp1
+
         if not self.ggi_df:
             return None
 
@@ -102,9 +104,9 @@ class Post_ggi:
             aln_base = row[0]
             tree_id  = row[1]
 
-            contained = set(tree_id_comp1) & set(tree_id)
+            # contained = set(tree_id_comp1) & set([tree_id])
 
-            if contained:
+            if tree_id == ha or tree_id == hb:
                 subset_df.append([aln_base, tree_id])
 
         if not subset_df:
@@ -118,7 +120,9 @@ class Post_ggi:
     def make_specific_prefix(self, tree_id_comp1):
         return "%s_h%s_h%s" % (self.model_prefix, tree_id_comp1[0], tree_id_comp1[1])
 
-    def shap_plots(self, xgb_clf_no_nor, all_num, new_prefix):
+    def shap_plots(self, xgb_clf_no_nor, all_num, new_prefix, _groups_dict):
+
+        # xgb_clf_no_nor, all_num, new_prefix = xgb_clf_no_nor, all_num, new_prefix
 
         bee_20_filename = "20best_beeswarm_%s.png" % new_prefix
         bee_all_filename = "all_beeswarm_%s.png" % new_prefix
@@ -129,6 +133,9 @@ class Post_ggi:
         shap.plots.beeswarm(shap_values,
                             max_display = 20,
                             show = False)
+
+        plt.title(_groups_dict[True], loc = 'right')
+        plt.title(_groups_dict[False], loc = 'left')
         plt.tight_layout(pad=0.05)
         plt.savefig(bee_20_filename, dpi = 330)
         plt.close()
@@ -138,6 +145,8 @@ class Post_ggi:
         shap.plots.beeswarm(shap_values,
                             max_display = len(all_num.columns),
                             show = False)
+        plt.title(_groups_dict[True], loc = 'right')
+        plt.title(_groups_dict[False], loc = 'left')
         plt.tight_layout(pad=0.05)
         plt.savefig(bee_all_filename, dpi = 330)
         plt.close()
@@ -158,7 +167,7 @@ class Post_ggi:
             writer = csv.writer(f, delimiter = "\t")
             writer.writerows(df)
 
-        sys.stdout.write('metadata written at: "%s"\n' % metadata_filename)
+        sys.stdout.write('\tmetadata written at: "%s"\n\n' % metadata_filename)
         sys.stdout.flush()
         
     def xgboost_classifier(self, tree_id_comp1):
@@ -235,6 +244,9 @@ class Post_ggi:
                             n_jobs = self.threads
                         )
 
+        sys.stdout.write("\tRunning the XGBoost classifier\r")
+        sys.stdout.flush()
+
         xgb_clf_no_nor.fit(all_num, all_labels.tolist(),
                            eval_set = [ (train_num, train_labels.tolist()) ],
                            early_stopping_rounds = 2000,
@@ -243,7 +255,14 @@ class Post_ggi:
                         )
 
         accuracy = accuracy_score(all_labels, xgb_clf_no_nor.predict(all_num))
-        self.shap_plots(xgb_clf_no_nor, all_num, new_prefix)
+
+        sys.stdout.write("\tRunning the XGBoost classifier, overall accuracy: %s\n" % round(accuracy, 6))
+        sys.stdout.flush()
+
+        sys.stdout.write("\tCalculating SHAP values\n")
+        sys.stdout.flush()
+
+        self.shap_plots(xgb_clf_no_nor, all_num, new_prefix, _groups_dict)
         joblib.dump(xgb_clf_no_nor, model_filename)
 
         self.create_metdata(
@@ -313,13 +332,20 @@ class Post_ggi:
             if tmp_model:
                 mytables.append(tmp_model)
 
+        sys.stdout.write("Plotting confusion matrices\n")
+        sys.stdout.flush()
+
         self.confusion_plots(mytables)
 
 # debugging --------------------------------------
 
-# file_comparisons = "/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/ggi_9hypos_comparisons.txt"
-# features_file    = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/features_991exons_fishlife.tsv'
-# all_ggi_results  = '/Users/ulises/Desktop/BAL/GGI_flatfishes/post_ggi/fishlife/all_907_ggi_fishlife_renamed.tsv'
+# import os
+# base_path = '/Users/ulises/Desktop/GOL/software/GGpy/proofs_ggi/flatfishes'
+
+# file_comparisons = os.path.join(base_path, 'comparisons.txt')
+# # features_file    = '/Users/ulises/Desktop/ABL/GGI_flatfishes/post_ggi/features_fstats_yongxin.tsv'
+# features_file    = os.path.join(base_path, 'features_991exons_fishlife.tsv')
+# all_ggi_results  = os.path.join(base_path, 'ggi_partial_results_clean.tsv')
 # threads = 5
 
 # self = Post_ggi(
