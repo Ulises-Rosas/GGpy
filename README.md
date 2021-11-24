@@ -10,6 +10,8 @@ Software requierements:
 
 ## Installation
 
+It is advisable to install this package inside a [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or [python environment](https://docs.python.org/3/library/venv.html) if there issues with system permissions.
+
 Using `pip`:
 
 ```Bash
