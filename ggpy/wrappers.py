@@ -154,11 +154,13 @@ class Consel:
 
     def au_table(self, consel_out):
         '''
+        # rank, item, au
+
         Example of consel out (withour initial apostrophes):
-        '# reading RAxML_perSiteLLs.E1381.fasta_Two_Hypothesis.pv
-        '# rank item    obs     au     np |     bp     pp     kh     sh    wkh    wsh |
-        '#    1    1   -4.7  0.932  0.899 |  0.897  0.991  0.886  0.886  0.886  0.886 |
-        '#    2    2    4.7  0.068  0.101 |  0.103  0.009  0.114  0.114  0.114  0.114 |       
+        '# reading RAxML_perSiteLLs.E1381.fasta_Two_Hypothesis.pv\\
+        '# rank item    obs     au     np |     bp     pp     kh     sh    wkh    wsh |\\
+        '#    1    1   -4.7  0.932  0.899 |  0.897  0.991  0.886  0.886  0.886  0.886 |\\
+        '#    2    2    4.7  0.068  0.101 |  0.103  0.009  0.114  0.114  0.114  0.114 |\\       
         '''
         # table = {}
         table = []
@@ -321,8 +323,9 @@ class Raxml:
             pr_message, cons_message = self._check_in(pr_message, check_point_f, 
                                                       seq, run_id)
 
-        for pr_id,metadata in pr_message.items():
+        for pr_id in sorted(pr_message.keys()):
             # pr_id,metadata
+            metadata   = pr_message[pr_id]
             pruned_str = metadata['pruned']
 
             seq2   = "%s_%s_%s" % (seq, pr_id, run_id)
@@ -376,9 +379,11 @@ class Raxml:
             is_there_out = os.path.isfile(final_out)
             
             if not is_there_out:
+                sys.stderr.write("\nWarning: Constraint of '%s' using '%s' hypothesis failed \n" % ( seq_basename, pr_id ) )
+                sys.stderr.flush()
                 with open(error_file, "a") as f:
                     writer = csv.writer(f, delimiter = "\t")
-                    writer.writerows([[ os.path.basename(seq), 'Constraint', pr_id ]])
+                    writer.writerows([[ seq_basename, 'Constraint', pr_id ]])
 
                 continue
             

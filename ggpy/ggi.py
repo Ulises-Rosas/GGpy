@@ -139,6 +139,9 @@ class GGI(Raxml, Consel):
         self.translation = hypothesis
 
     def _taxa_from_str(self, tmp_tree):
+        """
+        Get taxa from newick string
+        """
 
         tmp_tree = dendropy.Tree.get_from_string(  
                                     src = tmp_tree, 
@@ -168,9 +171,10 @@ class GGI(Raxml, Consel):
                 new_groups = set(str_taxa) - groups
 
                 if new_groups:
-                    sys.stderr.write( "\n %s groups do not match with the taxonomy file at: '%s'\n" % (new_groups, tmp_hypothesis) )
+                    sys.stderr.write( "\n Error: '%s' groups do not match with the taxonomy file at '%s' hypothesis\n" % (new_groups, count) )
                     sys.stderr.flush()
-                    continue
+                    sys.exit(1)
+                    # continue
       
                 extended_str = tmp_hypothesis
                 for k,v in df.items():
@@ -291,7 +295,8 @@ class GGI(Raxml, Consel):
         translation  = self.__load_trees__()
         aln_metadata = {}
 
-        for k,v in translation.items():
+        for k in sorted(translation.keys()):
+            v = translation[k]
             # k,v = tuple(self.translation.items())[0]
 
             tmp_tree = (dendropy
@@ -305,7 +310,9 @@ class GGI(Raxml, Consel):
             is_subset,which_taxa = self._aln_in_hypothesis(aln_taxa, tmp_tree)
 
             if not is_subset:
-                tmp_rows = [ [aln_base, wt, v['id']] for wt in which_taxa ]
+                sys.stderr.write("Warning: '%s' taxa is not a subset of hypothesis '%s' taxa \n" % ( aln_base, k ) )
+                sys.stderr.flush()
+                tmp_rows = [ [aln_base, wt, k] for wt in which_taxa ]
                 with open(self.unable_to_prune_f, 'a') as f:
                     writer = csv.writer(f, delimiter = "\t")
                     writer.writerows(tmp_rows)
@@ -365,8 +372,10 @@ class GGI(Raxml, Consel):
         # join constrains
         cons_trees = []
         # order matters
-        for i in range(len(cons_message)):
-            v = cons_message[ i + 1 ]
+        # some k might not have passed 
+        # the constrained process
+        for k in sorted(cons_message.keys()):
+            v = cons_message[k]
             with open( v['constrained'], 'r' ) as c:
                 cons_trees.append( c.read() )
 
@@ -385,34 +394,19 @@ class GGI(Raxml, Consel):
         else:
             return None
 
-    def keep_rank1_tree(self, au_table, sll_meta):
-        to_rm = []
-        s_item = 0
+    def keep_rank1_tree(self, const_tree, rank):
 
-        for rank, item, _ in au_table:
-            item_int = int(item)
+        if rank == '1':
 
-            if rank != '1':
-                to_rm.append(
+            new_name = re.sub(self.suffix, self.suffix + "_rank1", const_tree)
+            os.rename(const_tree, new_name)
+        else:
 
-                    sll_meta[item_int]['constrained']
-                )
+            try:
+                os.remove( const_tree )
+            except FileNotFoundError:
+                pass
 
-            else:
-                s_item += item_int
-                # rank1 += sll_meta[item_int]['constrained']
-
-        rank1 = sll_meta[s_item]['constrained']
-        # seq = sll_meta[s_item]['aln']
-        # self.add_bootstrap(
-        #     seq = seq, 
-        #     selected_tree = rank1,
-        #     suffix = self.suffix
-        # )
-        new_name = re.sub(self.suffix, self.suffix + "_rank1", rank1)
-
-        os.rename(rank1, new_name)
-        remove_files(to_rm)
 
     def au_tests(self, sll_message, seq_basename):
 
@@ -426,21 +420,41 @@ class GGI(Raxml, Consel):
         if not au_table:
             return None
 
-        self.keep_rank1_tree(au_table, sll_meta)
+        # Consel indexing might differ
+        # from sll_meta indexing when 
+        # either a prunning or constraint failed        
+        ordered_meta = sorted(list(sll_meta.items()), key=lambda kv: kv[0])        
+        """
+        Structure example:
+
+        [(1,
+          {'group': '(Outgroup,(Eso_salmo,(Argentiniformes,(Osme_Stomia,(Galaxiiformes,Neoteleostei)))));',
+           'aln': '/Users/ulises/Desktop/GOL/software/GGpy/demo/E1532.fasta',
+           'constrained': 'RAxML_bestTree.E1532.fasta_1_ggi.tsv.tree'}),
+         (2,
+          {'group': '(Outgroup,((Eso_salmo,Argentiniformes),(Osme_Stomia,(Galaxiiformes,Neoteleostei))));',
+           'aln': '/Users/ulises/Desktop/GOL/software/GGpy/demo/E1532.fasta',
+           'constrained': 'RAxML_bestTree.E1532.fasta_2_ggi.tsv.tree'})]
+        """
 
         out_cols = []
         for row in au_table:
             item    = int(row[1])
+            meta_item = ordered_meta[ item - 1 ] 
 
             rank    = row[0]
             au_test = row[2]
-            tree_id = item
-            group   = sll_meta[item]['group']
+
+            tree_id = meta_item[0]
+            group   = meta_item[1]['group']
 
             out_cols.append([
                     seq_basename, tree_id,
                     group, rank, au_test
                 ])
+
+            const_tree = meta_item[1]['constrained']
+            self.keep_rank1_tree(const_tree, rank)
 
         return out_cols
 
