@@ -76,6 +76,8 @@ class GGI(Raxml, Consel):
 
         self.hiddenfile = ".treebase_" + self.suffix
 
+        self.out_cols = [["alignment", "tree_id", "group", "rank", "au_test"]]
+
     
     @property
     def _taxa(self):
@@ -173,6 +175,8 @@ class GGI(Raxml, Consel):
                 if new_groups:
                     sys.stderr.write( "\n Error: '%s' groups do not match with the taxonomy file at '%s' hypothesis\n" % (new_groups, count) )
                     sys.stderr.flush()
+
+                    self.close_files()
                     sys.exit(1)
                     # continue
       
@@ -237,6 +241,7 @@ class GGI(Raxml, Consel):
                         sys.stderr.write("\nTest all possible rooted trees for more \n")
                         sys.stderr.write("than 8 groups is not currently available\n")
                         sys.stderr.flush()
+
                         self.close_files()
                         sys.exit(1)
 
@@ -247,6 +252,7 @@ class GGI(Raxml, Consel):
                         sys.stderr.write("\nTest all possible unrooted trees for more \n")
                         sys.stderr.write("than 9 groups is not currently available\n")
                         sys.stderr.flush()
+
                         self.close_files()
                         sys.exit(1)
 
@@ -266,6 +272,7 @@ class GGI(Raxml, Consel):
 
             sys.stderr.write("\nExtended hypothesis written at '%s'\n" % outname)
             sys.stderr.flush()
+
             self.close_files()
             sys.exit(0)
 
@@ -310,14 +317,15 @@ class GGI(Raxml, Consel):
             is_subset,which_taxa = self._aln_in_hypothesis(aln_taxa, tmp_tree)
 
             if not is_subset:
-                sys.stderr.write("Warning: '%s' taxa is not a subset of hypothesis '%s' taxa \n" % ( aln_base, k ) )
+                sys.stderr.write("Error: '%s' taxa is not a subset of hypothesis '%s' taxa \n" % ( aln_base, k ) )
                 sys.stderr.flush()
                 tmp_rows = [ [aln_base, wt, k] for wt in which_taxa ]
                 with open(self.unable_to_prune_f, 'a') as f:
                     writer = csv.writer(f, delimiter = "\t")
                     writer.writerows(tmp_rows)
 
-                continue
+                self.close_files()
+                sys.exit(1)
 
             tmp_tree.retain_taxa_with_labels( aln_taxa )
             pruned = tmp_tree.as_string(schema='newick')
@@ -353,6 +361,49 @@ class GGI(Raxml, Consel):
                                    self.unable_to_run_f, 
                                    self.suffix)
         
+    def _get_header(self, sll_files):
+        """
+        the hard way
+        """
+        header = ''
+        out_fmt = "  {nhypos}  {nsites}\n"
+        _,a = sll_files[0]
+
+        with open(a, 'r') as f:
+            header += f.readline().strip()
+
+        # might have changed after gap closure
+        nsites = re.sub(".+[ ]+([0-9]+$)", "\\1", header)
+
+        return out_fmt.format( nhypos = len(sll_files), nsites = nsites )
+    
+    def _merge_sll_files(self, header:str, body: list, aln_f: str) -> str:
+        out = aln_f + ".sitelh"
+
+        with open(out, 'w') as f:
+            f.write( header)
+
+            for i in body:
+                f.write(i)
+
+        return out
+
+    def parse_lh_raxml_estimates(self, sll_files: list, aln_f: str) -> str:
+
+        header = self._get_header(sll_files)
+        body   = []
+
+        for tree_id,lh_file in sll_files:            
+            estimates = ''
+
+            with open(lh_file, 'r') as f:
+                for i in f.readlines()[1:]:
+                    _, estimates = i.strip().split('\t')
+                    body.append( "tr%s\t%s\n" % (tree_id, estimates))
+                    break
+
+        return self._merge_sll_files(header, body, aln_f)
+
     def site_likelihoods(self, cons_message, aln_f):
         """
         constraints are sent 
@@ -367,32 +418,26 @@ class GGI(Raxml, Consel):
             return None
 
         # aln_f = next(iter(cons_message.values()))['aln']
-        whole_constrs_f = aln_f + "_AllCons_" + self.suffix
-        
-        # join constrains
-        cons_trees = []
         # order matters
+
         # some k might not have passed 
         # the constrained process
-        for k in sorted(cons_message.keys()):
+        sll_files = []
+        for k in sorted( cons_message.keys() ):
             v = cons_message[k]
-            with open( v['constrained'], 'r' ) as c:
-                cons_trees.append( c.read() )
 
-        with open( whole_constrs_f, "w") as f:
-            f.writelines(cons_trees)
+            sll_f = self._site_likehood(
+                            (aln_f, v['constrained'], k),
+                             self.suffix,
+                             self.unable_to_run_f
+                        )
 
-        sll_f = self._site_likehood(
-                        (aln_f, whole_constrs_f),
-                        self.suffix,
-                        self.unable_to_run_f
-                )
+            sll_files.append( (k, sll_f) )
 
-        if sll_f:
-            return (sll_f, cons_message)
-            # return (sll_f, sll_meta)
-        else:
-            return None
+        merged_sll_f = self.parse_lh_raxml_estimates(sll_files, aln_f)
+        remove_files( [i[1] for i in sll_files] )
+
+        return (merged_sll_f, cons_message)
 
     def keep_rank1_tree(self, const_tree, rank):
 
@@ -407,6 +452,19 @@ class GGI(Raxml, Consel):
             except FileNotFoundError:
                 pass
 
+    def _pack_hypotheses(self, seq_basename: str, ordered_meta: list) -> None:
+
+        const_dir = "%s_%s_constraints" % (seq_basename, self.suffix)
+
+        if not os.path.exists(const_dir):
+            os.mkdir( const_dir )
+
+        for _,meta in ordered_meta:
+            tmp_cons = meta['constrained']
+            os.rename(
+                tmp_cons ,
+                os.path.join(const_dir, tmp_cons)
+            )
 
     def au_tests(self, sll_message, seq_basename):
 
@@ -453,12 +511,13 @@ class GGI(Raxml, Consel):
                     group, rank, au_test
                 ])
 
-            const_tree = meta_item[1]['constrained']
-            self.keep_rank1_tree(const_tree, rank)
+        with open(self.final_out, 'a') as f:
+            writer = csv.writer(f, delimiter = "\t")
+            writer.writerows(out_cols)
 
-        return out_cols
+        self._pack_hypotheses(seq_basename, ordered_meta)
 
-    def ggi_iterator(self, file):
+    def ggi_iterator(self, file: str) -> None:
         # file = self.sequences[0]
         seq_basename = os.path.basename(file)
 
@@ -468,8 +527,8 @@ class GGI(Raxml, Consel):
         pr_message   = self.prunning(file)
         cons_message = self.constraints(pr_message)
         sll_message  = self.site_likelihoods(cons_message, file)
-        
-        return self.au_tests(sll_message, seq_basename)
+
+        self.au_tests(sll_message, seq_basename)
 
     def init_files(self):
 
@@ -483,8 +542,13 @@ class GGI(Raxml, Consel):
             writer = csv.writer(f, delimiter = "\t")
             writer.writerows(utr_cols)
 
+        with open(self.final_out, "w") as f:
+            writer = csv.writer(f, delimiter = "\t")
+            writer.writerows(self.out_cols)
+
     def close_files(self):
         files_check = [
+            self.final_out,
             self.unable_to_prune_f,
             self.unable_to_run_f
         ]
@@ -518,7 +582,7 @@ class GGI(Raxml, Consel):
             writer = csv.writer(f, delimiter = "\t")
             writer.writerows(trans_cols)
 
-        sys.stdout.write("=> '%s' file was written\n" % self.trans_out)
+        sys.stdout.write("'%s' file was written\n" % self.trans_out)
         sys.stdout.flush()
 
     def oneCore_gt(self):
@@ -530,59 +594,42 @@ class GGI(Raxml, Consel):
                 result  = p.map_async(self.ggi_iterator, (fa,))
                 preout.append(result)
 
-            out_cols = [["alignment", "tree_id", "group", "rank", "au_test"]]
             for pr in preout:
-                gotit = pr.get()[0]
-                if gotit:
-                    out_cols.extend(gotit)
+                pr.get()
 
-        return out_cols        
+        # return self.out_cols        
     
     def manyCore_gt(self):
 
         # preout = []
-        out_cols = [["alignment", "tree_id", "group", "rank", "au_test"]]
         for fa in self.sequences:
-            result = self.ggi_iterator(fa)
-            if result:
-                out_cols += result
-
-        return out_cols
+            self.ggi_iterator(fa)
+            # if result:
+            #     self.out_cols += result
+        # return self.out_cols
 
     def main(self):
 
         self.init_files()
         self._set_extended_hypothesis()
+        self.export_translation()
 
+        sys.stdout.write("\n\n")
+        sys.stdout.flush()
+        
         if not self.parallel_gt:
-            out_cols = self.oneCore_gt()
+            self.oneCore_gt()
 
         else:
-            out_cols = self.manyCore_gt()
+            self.manyCore_gt()
 
-
-        if len(out_cols ) > 1:    
-            sys.stdout.write("\n\n")
-            sys.stdout.flush()
-
-            with open(self.final_out, "w") as f:
-                writer = csv.writer(f, delimiter = "\t")
-                writer.writerows(out_cols)
-
-            sys.stdout.write("=> '%s' file was written\n" % self.final_out)
-            sys.stdout.flush()
-
-            self.export_translation()
-            self.close_files()
-        else:
-
-            self.close_files()
-            sys.exit(1)
+        self.close_files()
+        sys.exit(0)
                 
 
 # tests ----------------------#
 # import glob
-# # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/LOC*.fas")
+# # # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/LOC*.fas")
 # sequences = glob.glob("/Users/ulises/Desktop/GOL/software/GGpy/demo/E*.fasta")
 
 

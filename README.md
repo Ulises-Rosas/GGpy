@@ -58,11 +58,11 @@ ggpy ggi demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees
 cat out_ggi.txt
 ```
 ```
-alignment       tree_id group   rank    au_test
-E0055.fasta     1       (Outgroup,(Eso_salmo,(Argentiniformes,(Osme_Stomia,(Galaxiiformes,Neoteleostei)))));    1       0.882
-E0055.fasta     2       (Outgroup,((Eso_salmo,Argentiniformes),(Osme_Stomia,(Galaxiiformes,Neoteleostei))));    2       0.118
-E1532.fasta     2       (Outgroup,((Eso_salmo,Argentiniformes),(Osme_Stomia,(Galaxiiformes,Neoteleostei))));    1       0.922
-E1532.fasta     1       (Outgroup,(Eso_salmo,(Argentiniformes,(Osme_Stomia,(Galaxiiformes,Neoteleostei)))));    2       0.078
+alignment	tree_id	group	rank	au_test
+E0055.fasta	1	(Outgroup,(Eso_salmo,(Argentiniformes,(Osme_Stomia,(Galaxiiformes,Neoteleostei)))));	1	0.880
+E0055.fasta	2	(Outgroup,((Eso_salmo,Argentiniformes),(Osme_Stomia,(Galaxiiformes,Neoteleostei))));	2	0.120
+E1532.fasta	2	(Outgroup,((Eso_salmo,Argentiniformes),(Osme_Stomia,(Galaxiiformes,Neoteleostei))));	1	0.921
+E1532.fasta	1	(Outgroup,(Eso_salmo,(Argentiniformes,(Osme_Stomia,(Galaxiiformes,Neoteleostei)))));	2	0.079
 ```
 
 Utilities

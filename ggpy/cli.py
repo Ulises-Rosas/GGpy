@@ -59,7 +59,8 @@ ggi = subparsers.add_parser('ggi',
     $ %(prog)s [exon files] -H [file with topologies] -e
 
         note: `-e` specifies that topologies at `-H` files are 
-                extended (i.e., with actual species and not groups)
+                extended (i.e., with actual species and not groups
+                between parenthesis)
 
 """)
 
