@@ -1,19 +1,22 @@
 
-
+import os
 import csv
 import sys
 import collections
 
-
-
-import shap
-import joblib
+# import shap
+# import joblib
 import xgboost
+
+import numpy as np # downloaded as shap dependency as many other things
+
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.metrics import  accuracy_score, plot_confusion_matrix
 
+# from shap.plots._beeswarm import summary_legacy
 # """
 # 1,2
 # 1,3
@@ -27,6 +30,7 @@ class Post_ggi:
                  all_ggi_results = None,
                  file_comparisons = None,
                  model_prefix = "post_ggi",
+                 max_display = 17,
                  cnfx_ncols = 3,
                  threads = 1
                  ) -> None:
@@ -44,6 +48,21 @@ class Post_ggi:
             'SymPval', 'MarPval', 
             'IntPval'
         ]
+
+        # self.metadata_columns = [
+        #     'model_filename',
+        #     'accuracy',
+        #     'pos_hypo',
+        #     'neg_hypo'
+        # ]
+
+        self.metadata_columns = [
+            'pos_hypo',
+            'neg_hypo'
+            'accuracy',
+        ]
+
+        self.max_display = max_display
 
         # previously tuned hyperparameters
         self.gamma = 0.14210526315789473
@@ -120,19 +139,119 @@ class Post_ggi:
     def make_specific_prefix(self, tree_id_comp1):
         return "%s_h%s_h%s" % (self.model_prefix, tree_id_comp1[0], tree_id_comp1[1])
 
-    def shap_plots(self, xgb_clf_no_nor, all_num, new_prefix, _groups_dict):
+    def _bar_data(self, shap_values, all_num):
+
+        max_display = self.max_display
+        shap_means  = np.abs(shap_values).mean(0)
+        mysort      = np.argsort(shap_means)[::-1]
+        
+        y_axis = all_num.columns[mysort][:max_display][::-1]
+        x_axis = shap_means[mysort][:max_display][::-1]
+
+        return y_axis, x_axis
+
+    def _my_dependency_plot(self, all_num, lead, shap_values):
+
+        from shap.plots._scatter import dependence_legacy
+        import numpy as np
+        import matplotlib.colors as mcolors
+        from matplotlib import cm
+
+
+        tra = shap_values.values.T
+
+        lead = 'supp_mean'
+        # layer = 'supp_mean'
+        for layer in all_num.columns:
+
+            if layer == lead:
+                continue
+
+            ind = np.argwhere( all_num.columns == lead  ).flatten()[0]
+            interaction_index = np.argwhere( all_num.columns == layer  ).flatten()[0]
+
+            covar = all_num.iloc[:,interaction_index]
+            pre_cmap = cm.get_cmap('viridis', len(covar))
+
+            hexes = [ mcolors.rgb2hex( pre_cmap(i)  ) for i in range(len(covar)) ]
+            cmap,norm = mcolors.from_levels_and_colors(sorted([0]+list(covar)), hexes)
+
+            plt.scatter(
+                all_num.iloc[:,ind],
+                tra[ind,:],
+                c = list(covar),
+                cmap = cmap,
+                norm = norm,
+                s = 19, alpha = 0.9
+            )
+            plt.xlabel(lead)
+            plt.ylabel('SHAP value')
+            cbar = plt.colorbar( cm.ScalarMappable(norm = norm, cmap= cmap) )
+            cbar.set_label(layer)
+            
+            plt.tight_layout(pad=0.05)
+            plt.savefig("dependencies_plot/shap_%s_%s.png" % (lead,layer), dpi = 330)
+            plt.close()
+
+    def _update_meta_and_bardata(self, shap_values, accuracy, _groups_dict, all_num):
+        """
+        # update metadata & get bar data
+        """
+        # model_filename = '%s.sav' % new_prefix
+        # self.add_metdata(
+        #     self._join_shaps(shap_values, 
+        #                      [ model_filename,
+        #                        accuracy,
+        #                        _groups_dict[True ],
+        #                        _groups_dict[False]  ] ) )
+
+        self.add_metdata(
+            self._join_shaps(shap_values, 
+                             [ _groups_dict[True ],
+                               _groups_dict[False],
+                               accuracy, ] ) )
+
+        return self._bar_data( shap_values, all_num ) 
+
+    def shap_things(self, xgb_clf_no_nor, all_num, new_prefix, _groups_dict, accuracy):
+        
+        # heavy imports
+        from shap import Explainer
+        from shap.plots._beeswarm import summary_legacy
+        # heavy imports
 
         # xgb_clf_no_nor, all_num, new_prefix = xgb_clf_no_nor, all_num, new_prefix
 
-        bee_20_filename = "20best_beeswarm_%s.png" % new_prefix
-        bee_all_filename = "all_beeswarm_%s.png" % new_prefix
+        bee_20_filename = "best%s_beeswarm_%s.png" % (self.max_display,new_prefix)
 
-        explainer   = shap.Explainer(xgb_clf_no_nor, all_num)
-        shap_values = explainer(all_num)
+        explainer     = Explainer(xgb_clf_no_nor, all_num)
+        shap_values   = explainer(all_num)
 
-        shap.plots.beeswarm(shap_values,
-                            max_display = 20,
-                            show = False)
+        y_axis,x_axis = self._update_meta_and_bardata( shap_values.values, accuracy, 
+                                                       _groups_dict, all_num )
+        
+        gs = gridspec.GridSpec(1, 2,  width_ratios=[1, 1.7]) 
+        # plt.rcParams['font.size'] = 14.0
+
+        plt.subplot( gs[0] )
+        plt.barh(
+            y_axis, x_axis, height=0.6,
+            align  ='center',
+            color  = 'gray',
+            zorder = 3
+        )
+        plt.yticks([])
+        plt.grid(True, which='major', axis='x')
+        plt.gca().invert_xaxis()
+        plt.xlabel('mean(|SHAP value|)', fontsize = 13)
+
+        plt.subplot( gs[1] )
+        summary_legacy(
+            shap_values,
+            max_display = self.max_display,
+            plot_size   = (self.max_display*0.5, self.max_display*0.3),
+            show = False
+        )
 
         plt.title(_groups_dict[True], loc = 'right')
         plt.title(_groups_dict[False], loc = 'left')
@@ -140,46 +259,52 @@ class Post_ggi:
         plt.savefig(bee_20_filename, dpi = 330)
         plt.close()
 
-        # explainer   = shap.Explainer(xgb_clf_no_nor, all_num)
-        shap_values = explainer(all_num)
-        shap.plots.beeswarm(shap_values,
-                            max_display = len(all_num.columns),
-                            show = False)
-        plt.title(_groups_dict[True], loc = 'right')
-        plt.title(_groups_dict[False], loc = 'left')
-        plt.tight_layout(pad=0.05)
-        plt.savefig(bee_all_filename, dpi = 330)
-        plt.close()
+    def _join_shaps(self, shap_values, values):
 
-    def create_metdata(self, new_prefix, values):
+        joined = []
+        for row in shap_values:
+            joined += [values + list(row)]
 
-        metadata_filename = '%s_metadata.tsv' % new_prefix
-        columns = [
-            'model_filename',
-            'accuracy',
-            'pos_hypo',
-            'neg_hypo'
-        ]
+        return joined
 
-        df = list(zip(columns, values))
+    def _get_columns(self):
+        cols = list(self.features.columns)
 
-        with open(metadata_filename, 'w') as f:
-            writer = csv.writer(f, delimiter = "\t")
-            writer.writerows(df)
+        for i in self.drop_columns:
+            if cols.__contains__(i):
+                cols.remove(i)
 
-        sys.stdout.write('\tmetadata written at: "%s"\n\n' % metadata_filename)
+        return self.metadata_columns + cols
+
+    def add_metdata(self, values, init = False):
+
+        metadata_filename = '%s_metadata.tsv' % self.model_prefix
+
+        if init:
+
+            with open(metadata_filename, 'w') as f:
+                writer = csv.writer(f, delimiter = "\t")
+                writer.writerows( [self._get_columns()] + values  )
+
+        else:
+
+            with open(metadata_filename, 'a') as f:
+                writer = csv.writer(f, delimiter = "\t")
+                writer.writerows(values)
+
+        sys.stdout.write('\tWritting metadata at: "%s"\n\n' % metadata_filename)
         sys.stdout.flush()
         
     def xgboost_classifier(self, tree_id_comp1):
 
-        # tree_id_comp1 = self.tree_id_comp[0]
+        # tree_id_comp1 = self.tree_id_comp[1]
 
         if not tree_id_comp1:
             return None
 
         dataset = "H%s-H%s" % tuple(tree_id_comp1)
         new_prefix = self.make_specific_prefix(tree_id_comp1)
-        model_filename = '%s.sav' % new_prefix
+        # model_filename = '%s.sav' % new_prefix
 
         sys.stdout.write('Processing: "%s" dataset\n' % dataset)
         sys.stdout.flush()
@@ -262,19 +387,15 @@ class Post_ggi:
         sys.stdout.write("\tCalculating SHAP values\n")
         sys.stdout.flush()
 
-        self.shap_plots(xgb_clf_no_nor, all_num, new_prefix, _groups_dict)
-        joblib.dump(xgb_clf_no_nor, model_filename)
-
-        self.create_metdata(
-            new_prefix = new_prefix,
-            values = [
-                model_filename,
-                accuracy,
-                _groups_dict[True],
-                _groups_dict[False]
-            ]
+        self.shap_things(
+            xgb_clf_no_nor,
+            all_num, 
+            new_prefix, 
+            _groups_dict, 
+            accuracy
         )
 
+        # joblib.dump(xgb_clf_no_nor, model_filename)
         return (all_num, all_labels, 
                 _groups_dict, xgb_clf_no_nor, 
                 dataset)
@@ -325,6 +446,8 @@ class Post_ggi:
 
     def xgboost_iterator(self):
 
+        self.add_metdata(self, None, init = True)        
+
         mytables = []
         for tree_id_comp1 in self.tree_id_comp:
 
@@ -340,12 +463,12 @@ class Post_ggi:
 # debugging --------------------------------------
 
 # import os
-# base_path = '/Users/ulises/Desktop/GOL/software/GGpy/proofs_ggi/flatfishes'
+# base_path = '/Users/ulises/Desktop/GOL/software/GGpy/proofs_ggi/postRaxmlBug/flatfishes'
 
-# file_comparisons = os.path.join(base_path, 'comparisons.txt')
+# file_comparisons = os.path.join(base_path, 'comparisonfile.txt')
 # # features_file    = '/Users/ulises/Desktop/ABL/GGI_flatfishes/post_ggi/features_fstats_yongxin.tsv'
 # features_file    = os.path.join(base_path, 'features_991exons_fishlife.tsv')
-# all_ggi_results  = os.path.join(base_path, 'ggi_partial_results_clean.tsv')
+# all_ggi_results  = os.path.join(base_path, 'raxml_noRaxmlBug_results_clean_ggi.tsv')
 # threads = 5
 
 # self = Post_ggi(
@@ -354,7 +477,6 @@ class Post_ggi:
 #     file_comparisons = file_comparisons,
 #     threads = 6
 # )
-
-# self.xgboost_classifier_iterator()
+# self.xgboost_classifier(self.tree_id_comp[1])
 
 # debugging --------------------------------------

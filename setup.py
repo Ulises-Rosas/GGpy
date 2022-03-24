@@ -42,7 +42,7 @@ dependencies = [
     "fishlifetraits>=0.4.5", # own package
     'dendropy==4.4.0',
     'shap',
-    'joblib',
+    # 'joblib',
     'xgboost',
     'pandas',
     'scikit-learn',
