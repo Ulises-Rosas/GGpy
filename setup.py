@@ -39,7 +39,7 @@ else:
 
 
 dependencies = [
-    "fishlifetraits>=0.4.5", # own package
+    "fishlifetraits>=0.5.0", # own package
     'dendropy==4.4.0',
     'shap',
     # 'joblib',

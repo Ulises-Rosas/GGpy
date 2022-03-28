@@ -289,6 +289,7 @@ def main():
             reference_tree = None,
             groups_file    = None,
             codon_aware    = wholeargs.codon_aware,
+            sym_tests      = False,
             threads        = wholeargs.threads,
             suffix         = wholeargs.suffix,
         ).write_stats()
