@@ -58,7 +58,7 @@ class Post_ggi:
 
         self.metadata_columns = [
             'pos_hypo',
-            'neg_hypo'
+            'neg_hypo',
             'accuracy',
         ]
 
@@ -209,7 +209,9 @@ class Post_ggi:
             self._join_shaps(shap_values, 
                              [ _groups_dict[True ],
                                _groups_dict[False],
-                               accuracy, ] ) )
+                               accuracy, ] ), 
+            False
+        )
 
         return self._bar_data( shap_values, all_num ) 
 
@@ -276,7 +278,7 @@ class Post_ggi:
 
         return self.metadata_columns + cols
 
-    def add_metdata(self, values, init = False):
+    def add_metdata(self, values, init):
 
         metadata_filename = '%s_metadata.tsv' % self.model_prefix
 
@@ -284,7 +286,7 @@ class Post_ggi:
 
             with open(metadata_filename, 'w') as f:
                 writer = csv.writer(f, delimiter = "\t")
-                writer.writerows( [self._get_columns()] + values  )
+                writer.writerows( [self._get_columns()] )
 
         else:
 
@@ -446,7 +448,7 @@ class Post_ggi:
 
     def xgboost_iterator(self):
 
-        self.add_metdata(self, None, init = True)        
+        self.add_metdata(None,  True)        
 
         mytables = []
         for tree_id_comp1 in self.tree_id_comp:
