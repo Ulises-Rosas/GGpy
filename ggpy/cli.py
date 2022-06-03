@@ -146,7 +146,8 @@ Examples:
         $ %(prog)s -A [alignment file extension] -T [tree file extension]
 
             Where '-A' and '-T' indicate file extensions for alignments and 
-            trees, correspondingly.
+            trees, correspondingly. For each pair alignment and tree, extensions
+            are taken out and leftovers should match
 
 """)
 fstats.add_argument('-A','--aln',
