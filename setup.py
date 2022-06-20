@@ -43,7 +43,7 @@ dependencies = [
     'dendropy==4.4.0',
     'shap',
     # 'joblib',
-    'xgboost',
+    'xgboost==1.4.1',
     'pandas',
     'scikit-learn',
     'matplotlib',
