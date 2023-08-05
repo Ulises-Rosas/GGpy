@@ -73,9 +73,3 @@ Utilities
 ```Bash
 ggpy features -A [alignment file extension] -T [tree file extension]
 ```
-
-### post-GGI
-
-```Bash
-ggpy post [ggi result] -f [features result] -c [comparison file]
-```
