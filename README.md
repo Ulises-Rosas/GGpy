@@ -46,7 +46,6 @@ positional arguments:
   {ggi,features,post}
     ggi                Gene-Genealogy Interrogation (GGI)
     features           Features from both alignment and tree information
-    post               Classification of GGI hypothesis based on features
 
 optional arguments:
   -h, --help           show this help message and exit
