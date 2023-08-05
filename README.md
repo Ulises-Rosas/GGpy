@@ -1,6 +1,6 @@
 # GGpy
 
-GGI automatization
+GGI automatization and feature extraction
 
 Software requierements:
 
