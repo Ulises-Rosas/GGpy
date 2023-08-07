@@ -14,17 +14,18 @@ It is advisable to install this package inside a [conda](https://docs.conda.io/p
 
 Using `pip`:
 
-<!-- # pip install numpy # needed for python<3.7 -->
 
 ```Bash
+pip install numpy # needed for those with python<3.7
 pip install ggi
 ```
 
 Using `git` and `pip` (Optional):
-<!-- python3 -m pip install numpy # needed for python<3.7 -->
+
 ```Bash
 git clone https://github.com/Ulises-Rosas/GGpy.git
 cd GGpy
+python3 -m pip install numpy # needed for those with python<3.7 
 python3 -m pip install .
 ```
 
