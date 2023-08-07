@@ -41,12 +41,12 @@ else:
 dependencies = [
     "fishlifetraits>=0.5.0", # own package
     'dendropy==4.4.0',
-    'shap',
+    # 'shap',
     # 'joblib',
-    'xgboost==1.4.1',
-    'pandas',
-    'scikit-learn',
-    'matplotlib',
+    # 'xgboost==1.4.1',
+    # 'pandas',
+    # 'scikit-learn',
+    # 'matplotlib',
 ]
 
 with open('README.md') as readme_file:

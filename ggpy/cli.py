@@ -8,7 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser( formatter_class = argparse.RawDescriptionHelpFormatter, 
                                       description = '''
-                                 GGI and Post-GGI
+                                    GGI and more
                                       ''')
 subparsers = parser.add_subparsers(help='', dest='subcommand')
 
@@ -198,61 +198,61 @@ fstats.add_argument('-n', '--threads',
                     help    = '[Optional] number of cpus [Default = 1]')          
 # fstats -----------------------------------------------------------------------
 
-# post_ggi --------------------------------------------------------------------------
-post_ggi_sub = subparsers.add_parser('post', help = "Classification of GGI hypothesis based on features",
-                              formatter_class = argparse.RawDescriptionHelpFormatter, 
-                              description="""
+# # post_ggi --------------------------------------------------------------------------
+# post_ggi_sub = subparsers.add_parser('post', help = "Classification of GGI hypothesis based on features",
+#                               formatter_class = argparse.RawDescriptionHelpFormatter, 
+#                               description="""
                               
-                    Post-GGI
-Examples:
+#                     Post-GGI
+# Examples:
 
-    * Standard usage:
+#     * Standard usage:
 
-        $ %(prog)s [ggi result] -f [features result] -c [comparison file]
+#         $ %(prog)s [ggi result] -f [features result] -c [comparison file]
 
-        note 1: feature file is obtained from the 'features' subcomand
-        note 2: comparison file is a CSV-formated file and it containts
-                pairs of tree ids from the ggi result file:
+#         note 1: feature file is obtained from the 'features' subcomand
+#         note 2: comparison file is a CSV-formated file and it containts
+#                 pairs of tree ids from the ggi result file:
 
-                1,2
-                1,3
-                ...
+#                 1,2
+#                 1,3
+#                 ...
 
-                In above example, hypothesis 1 and hypothesis 2 are compared,
-                then hypothesis 1 and hypothesis 3 are compared, and so on.
+#                 In above example, hypothesis 1 and hypothesis 2 are compared,
+#                 then hypothesis 1 and hypothesis 3 are compared, and so on.
 
-""")
+# """)
 
-post_ggi_sub.add_argument('all_ggi_results',
-                      metavar = 'file',
-                      help='file from the "ggi" subcomand')
-post_ggi_sub.add_argument('-f','--features',
-                    metavar="",
-                    type= str,
-                    required=True,
-                    help='File with features of alignments and trees [Default: None]')
-post_ggi_sub.add_argument('-c','--comparisons',
-                    metavar="",
-                    type= str,
-                    required=True,
-                    help='File with hypothesis id to compare [Default: None]')
+# post_ggi_sub.add_argument('all_ggi_results',
+#                       metavar = 'file',
+#                       help='file from the "ggi" subcomand')
+# post_ggi_sub.add_argument('-f','--features',
+#                     metavar="",
+#                     type= str,
+#                     required=True,
+#                     help='File with features of alignments and trees [Default: None]')
+# post_ggi_sub.add_argument('-c','--comparisons',
+#                     metavar="",
+#                     type= str,
+#                     required=True,
+#                     help='File with hypothesis id to compare [Default: None]')
 
-post_ggi_sub.add_argument('-s','--suffix', 
-                        metavar="",
-                        type = str,
-                        default='post_ggi',
-                        help='[Optional] prefix name for outputs [Default = post_ggi]' )
-post_ggi_sub.add_argument('-l', '--ncols',
-                    metavar = "",
-                    type    = int,
-                    default = 3,
-                    help    = '[Optional] number of columns for plotting confusion matrices [Default = 3]') 
-post_ggi_sub.add_argument('-n', '--threads',
-                    metavar = "",
-                    type    = int,
-                    default = 1,
-                    help    = '[Optional] number of cpus [Default = 1]') 
-# post_ggi --------------------------------------------------------------------------
+# post_ggi_sub.add_argument('-s','--suffix', 
+#                         metavar="",
+#                         type = str,
+#                         default='post_ggi',
+#                         help='[Optional] prefix name for outputs [Default = post_ggi]' )
+# post_ggi_sub.add_argument('-l', '--ncols',
+#                     metavar = "",
+#                     type    = int,
+#                     default = 3,
+#                     help    = '[Optional] number of columns for plotting confusion matrices [Default = 3]') 
+# post_ggi_sub.add_argument('-n', '--threads',
+#                     metavar = "",
+#                     type    = int,
+#                     default = 1,
+#                     help    = '[Optional] number of cpus [Default = 1]') 
+# # post_ggi --------------------------------------------------------------------------
 
 
 def main():
@@ -295,19 +295,19 @@ def main():
             suffix         = wholeargs.suffix,
         ).write_stats()
 
-    elif wholeargs.subcommand == "post":
+    # elif wholeargs.subcommand == "post":
 
-        from ggpy.classifier import Post_ggi
+    #     from ggpy.classifier import Post_ggi
 
-        Post_ggi(
-            feature_file    = wholeargs.features,
-            all_ggi_results  = wholeargs.all_ggi_results,
-            file_comparisons = wholeargs.comparisons,
-            model_prefix     = wholeargs.suffix,
-            cnfx_ncols       = wholeargs.ncols,
-            threads          = wholeargs.threads
+    #     Post_ggi(
+    #         feature_file    = wholeargs.features,
+    #         all_ggi_results  = wholeargs.all_ggi_results,
+    #         file_comparisons = wholeargs.comparisons,
+    #         model_prefix     = wholeargs.suffix,
+    #         cnfx_ncols       = wholeargs.ncols,
+    #         threads          = wholeargs.threads
 
-        ).xgboost_iterator()
+    #     ).xgboost_iterator()
 
 if __name__ == "__main__":
     main()
