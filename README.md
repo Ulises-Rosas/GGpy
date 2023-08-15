@@ -71,7 +71,7 @@ Utilities
 
 ### Features
 
-Feature extraction from alignments and sequences
+Feature extraction from alignments and sequences. List of features can be seen [here](https://github.com/Ulises-Rosas/fishlifetraits/blob/main/fishlifetraits/var_desc.md)
 
 ```Bash
 ggpy features -A [alignment file extension] -T [tree file extension]
