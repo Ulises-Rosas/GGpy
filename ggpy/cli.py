@@ -14,7 +14,7 @@ subparsers = parser.add_subparsers(help='', dest='subcommand')
 
 # ggi -------------------------------------------------------------------------
 ggi = subparsers.add_parser('ggi',
-                             help = "Gene-Genealogy Interrogation (GGI)",
+                             help = "Gene-Genealogy Interrogation",
                              formatter_class = argparse.RawDescriptionHelpFormatter, 
                              description="""
 
@@ -198,61 +198,71 @@ fstats.add_argument('-n', '--threads',
                     help    = '[Optional] number of cpus [Default = 1]')          
 # fstats -----------------------------------------------------------------------
 
-# # post_ggi --------------------------------------------------------------------------
-# post_ggi_sub = subparsers.add_parser('post', help = "Classification of GGI hypothesis based on features",
-#                               formatter_class = argparse.RawDescriptionHelpFormatter, 
-#                               description="""
-                              
-#                     Post-GGI
-# Examples:
+# post_ggi --------------------------------------------------------------------------
+post_ggi_sub = subparsers.add_parser('fi', help = "Feature importance using Random Forest",
+                              formatter_class = argparse.RawDescriptionHelpFormatter, 
+                              description="""
 
-#     * Standard usage:
+    Feature Importance (FI) using Random Forest-based non-linear regression 
+               between the features and GGI results
+            
+Examples:
 
-#         $ %(prog)s [ggi result] -f [features result] -c [comparison file]
-
-#         note 1: feature file is obtained from the 'features' subcomand
-#         note 2: comparison file is a CSV-formated file and it containts
-#                 pairs of tree ids from the ggi result file:
-
-#                 1,2
-#                 1,3
-#                 ...
-
-#                 In above example, hypothesis 1 and hypothesis 2 are compared,
-#                 then hypothesis 1 and hypothesis 3 are compared, and so on.
-
-# """)
-
-# post_ggi_sub.add_argument('all_ggi_results',
-#                       metavar = 'file',
-#                       help='file from the "ggi" subcomand')
-# post_ggi_sub.add_argument('-f','--features',
-#                     metavar="",
-#                     type= str,
-#                     required=True,
-#                     help='File with features of alignments and trees [Default: None]')
-# post_ggi_sub.add_argument('-c','--comparisons',
-#                     metavar="",
-#                     type= str,
-#                     required=True,
-#                     help='File with hypothesis id to compare [Default: None]')
-
-# post_ggi_sub.add_argument('-s','--suffix', 
-#                         metavar="",
-#                         type = str,
-#                         default='post_ggi',
-#                         help='[Optional] prefix name for outputs [Default = post_ggi]' )
-# post_ggi_sub.add_argument('-l', '--ncols',
-#                     metavar = "",
-#                     type    = int,
-#                     default = 3,
-#                     help    = '[Optional] number of columns for plotting confusion matrices [Default = 3]') 
-# post_ggi_sub.add_argument('-n', '--threads',
-#                     metavar = "",
-#                     type    = int,
-#                     default = 1,
-#                     help    = '[Optional] number of cpus [Default = 1]') 
-# # post_ggi --------------------------------------------------------------------------
+    * Standard usage:
+        $ %(prog)s -X [feature matrix] -y [ggi results]
+""")
+post_ggi_sub.add_argument('-X','--features',
+                      metavar = '',
+                      required=True,
+                      help='file from the "ggi" subcomand')
+post_ggi_sub.add_argument('-y','--labels',
+                      metavar = '',
+                      required=True,
+                      help='file from the "features" subcomand')
+post_ggi_sub.add_argument('-t', '--test_size',
+                      metavar = "",
+                      type    = float,
+                      default = 0.35,
+                      help    = '[Optional] Testing size proportion [Default = 0.35]')
+post_ggi_sub.add_argument('-e', '--trees',
+                      metavar = "",
+                      type    = int,
+                      default = 100,
+                      help    = '[Optional] number of estimators [Default = 100]')
+post_ggi_sub.add_argument('-b', '--cv',
+                      metavar = "",
+                      type    = int,
+                      default = 3,
+                      help    = '[Optional] number of CV rounds for FI [Default = 3]')
+post_ggi_sub.add_argument('-i', '--iter_perm',
+                      metavar = "",
+                      type    = int,
+                      default = 30,
+                      help    = '[Optional] number of iteration in permutation importance [Default = 30]')
+post_ggi_sub.add_argument('-r', '--hyperparameter_size',
+                    metavar = "",
+                    type    = int,
+                    default = 1,
+                    help    = '[Optional] number hyperparameter tested in the specific range [Default = 1]') 
+post_ggi_sub.add_argument('-s','--suffix', 
+                        metavar="",
+                        type = str,
+                        default='demo',
+                        help='[Optional] prefix name for outputs [Default = demo]' )
+post_ggi_sub.add_argument('-n', '--threads',
+                    metavar = "",
+                    type    = int,
+                    default = 1,
+                    help    = '[Optional] number of cpus [Default = 1]') 
+post_ggi_sub.add_argument('-p','--path',
+                    metavar="",
+                    type= str,
+                    default=".",
+                    help="[Optional] Path for outputs [Default: '.']")   
+post_ggi_sub.add_argument('-g','--use_gini',
+                    action="store_true",
+                    help='[Optional] If selected, gini impurity metric is used to obtain feature importances')
+# post_ggi --------------------------------------------------------------------------
 
 
 def main():
@@ -295,19 +305,26 @@ def main():
             suffix         = wholeargs.suffix,
         ).write_stats()
 
-    # elif wholeargs.subcommand == "post":
+    elif wholeargs.subcommand == "fi":
+        # print(wholeargs)
 
-    #     from ggpy.classifier import Post_ggi
+        from ggpy.nonlinear_regression import FeatureImportance
 
-    #     Post_ggi(
-    #         feature_file    = wholeargs.features,
-    #         all_ggi_results  = wholeargs.all_ggi_results,
-    #         file_comparisons = wholeargs.comparisons,
-    #         model_prefix     = wholeargs.suffix,
-    #         cnfx_ncols       = wholeargs.ncols,
-    #         threads          = wholeargs.threads
-
-    #     ).xgboost_iterator()
+        myclass = FeatureImportance(
+            features_file    = wholeargs.features,
+            all_ggi_results  = wholeargs.labels,
+            n_jobs           = wholeargs.threads,
+            n_estimators     = wholeargs.trees, #
+            boots            = wholeargs.cv, #
+            test_prop        = wholeargs.test_size, #
+            n_repeats        = wholeargs.iter_perm, # iter for Permutations # 
+            cv_size          = wholeargs.hyperparameter_size, # hyperparameter
+            suffix           = wholeargs.suffix,
+            out_folder       = wholeargs.path,
+            gini_based       = wholeargs.use_gini # FI from gini impurity metric
+        )
+        myclass.regression_beta()
+        # self.get_params()
 
 if __name__ == "__main__":
     main()

@@ -44,8 +44,8 @@ dependencies = [
     # 'shap',
     # 'joblib',
     # 'xgboost==1.4.1',
-    # 'pandas',
-    # 'scikit-learn',
+    'pandas',
+    'scikit-learn',
     # 'matplotlib',
 ]
 
@@ -53,7 +53,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name = "ggi",
-      version = '1.4',
+      version = '1.5',
       maintainer = 'Ulises Rosas',
     #   long_description = readme,
     #   long_description_content_type = 'text/markdown',
