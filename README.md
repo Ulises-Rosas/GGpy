@@ -55,7 +55,7 @@ optional arguments:
 ### GGI
 
 ```Bash
-ggpy ggi demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees  
+ggpy ggi demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees -c
 cat out_ggi.txt
 ```
 ```
