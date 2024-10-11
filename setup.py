@@ -41,19 +41,15 @@ else:
 dependencies = [
     "fishlifetraits>=0.5.0", # own package
     'dendropy==4.4.0',
-    # 'shap',
-    # 'joblib',
-    # 'xgboost==1.4.1',
     'pandas',
     'scikit-learn',
-    # 'matplotlib',
 ]
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(name = "ggi",
-      version = '1.5',
+      version = '2.0.0',
       maintainer = 'Ulises Rosas',
     #   long_description = readme,
     #   long_description_content_type = 'text/markdown',

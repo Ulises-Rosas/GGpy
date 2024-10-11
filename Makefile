@@ -10,7 +10,8 @@ COMPRESSED = $(FULL_NAME)'.tar.gz'
 all: dist_dir update_bins upload
 
 dist_dir:
-	python3 setup.py sdist bdist_wheel
+	# python3 setup.py sdist bdist_wheel
+	python3 -m build .
 
 update_bins:
 	tar -xvzf dist/$(COMPRESSED)
