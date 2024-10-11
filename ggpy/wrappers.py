@@ -5,7 +5,6 @@ import csv
 import sys
 import glob
 import pickle
-import copy
 from ggpy.utils import (fas_to_dic,
                         export_fasta, 
                         runshell, 
@@ -26,7 +25,7 @@ SEQMT   = "seqmt"
 MAKERMT = "makermt"
 CONSEL  = "consel"
 CATPV   = "catpv"
-
+FLAGMODELS = ['JC69', 'HKY85', 'K80']
 class Consel:
 
     def __init__(self, 
@@ -106,16 +105,20 @@ class Consel:
             {raxml}\
                 -f g\
                 -s {seq}  \
+                -p 12038\
                 -m {model}\
                 -z {constr}\
                 -n {suffix}\
                 -T {threads}""".format(
                     raxml   = self.raxml_exe,
-                    model   = self.evomodel,
+                    model   = 'GTRGAMMA' if self.evomodel in FLAGMODELS else self.evomodel,
                     seq     = seq_gap_close,
                     constr  = tree_nHypos,
                     threads = self._adj_threads,
                     suffix  = site_lnl_out_suffix).strip()
+        
+        if self.evomodel in FLAGMODELS:
+            cmd += f" --{self.evomodel}"
 
         # print(cmd)
         runshell( (cmd.split(), std_err_holder), type = "stdout")
@@ -134,10 +137,8 @@ class Consel:
                 writer = csv.writer(f, delimiter = "\t")
                 writer.writerows([[ seq_basename, 'SLL', tree_id]])
 
-            sys.stderr.write( "\nError: Estimation of SLL from '%s' using '%s' hypothesis failed\n" % (seq_basename, tree_id) )
-            sys.stderr.flush()
-            
-            sys.exit(1)
+            print( "\nError: Estimation of SLL from '%s' using '%s' hypothesis failed\n" % (seq_basename, tree_id) )
+            raise Exception("Estimation of SLL failed")
 
         else:
             return site_lnl_out
@@ -279,41 +280,6 @@ class Raxml:
         with open( name, 'rb') as f:
             return pickle.load(f)
 
-    # def _check_in(self, pr_message, check_point_f, seq, run_id):
-
-    #     new_pr_message   = {}
-    #     new_cons_message = {}
-    #     old_pr_message   = copy.deepcopy(pr_message)
-
-    #     for pr_id,metadata in old_pr_message.items():
-
-    #         seq2   = "%s_%s_%s" % (seq, pr_id, run_id)
-    #         seq2_basename = os.path.basename(seq2)
-
-    #         suffix        = seq2_basename + ".tree"
-    #         final_out     = "RAxML_bestTree." + suffix
-            
-    #         already_run = self.__load_info__(check_point_f)
-
-    #         if already_run.__contains__(final_out):
-    #             new_cons_message[pr_id] = {
-    #                     'group'       : metadata['group'],
-    #                     'aln'         : metadata['aln']  ,
-    #                     'constrained' : final_out        
-    #                 } 
-
-    #             with open(final_out, "w") as f:
-    #                 f.write(already_run[final_out])
-
-    #             continue
-    #         else:
-    #             new_pr_message[pr_id] = metadata
-    #         ## -------check in ------------------------ ##
-    #     return new_pr_message, new_cons_message
-
-    # def _check_out(self):
-    #     pass
-
     def __iter_raxml__(self, pr_message, error_file, run_id):
         """
         raxml iterator
@@ -322,12 +288,6 @@ class Raxml:
 
         seq = next(iter(pr_message.values()))['aln']
         seq_basename = os.path.basename(seq)
-
-        # check_point_f = ".checkPoint_%s_%s" % (seq_basename,run_id)
-
-        # if os.path.isfile(check_point_f):
-        #     pr_message, cons_message = self._check_in(pr_message, check_point_f, 
-        #                                               seq, run_id)
 
         for pr_id in sorted(pr_message.keys()):
             # pr_id,metadata
@@ -359,7 +319,7 @@ class Raxml:
 
             cmd = """
                 {raxml}         \
-                    -p 12345    \
+                    -p 12038    \
                     -g {pruned} \
                     -m {model}  \
                     -s {seq}    \
@@ -370,13 +330,16 @@ class Raxml:
                     -T {threads}""".format(
                         raxml      = self.raxml_exe,
                         pruned     = pruned,
-                        model      = self.evomodel,
+                        model      = 'GTRGAMMA' if self.evomodel in FLAGMODELS else self.evomodel,
                         seq        = seq2,
                         partitions = partition_cmd,
                         suffix     = suffix,
                         runs       = self.iterations,
                         threads    = self._adj_threads
                     ).strip()
+            
+            if self.evomodel in FLAGMODELS:
+                cmd += f" --{self.evomodel}"
             # print(cmd)
             runshell( ( cmd.split(), seq2 + ".stdout" ), type = "stdout" )
 
@@ -385,36 +348,18 @@ class Raxml:
             is_there_out = os.path.isfile(final_out)
             
             if not is_there_out:
-                sys.stderr.write("\nError: Constraint of '%s' using '%s' hypothesis failed\n" % ( seq_basename, pr_id ) )
-                sys.stderr.flush()
-
                 with open(error_file, "a") as f:
                     writer = csv.writer(f, delimiter = "\t")
                     writer.writerows([[ seq_basename, 'Constraint', pr_id ]])
 
-                sys.exit(1)
+                print("\nError: Constraint of '%s' using '%s' hypothesis failed\n" % ( seq_basename, pr_id ) )
+                raise Exception("Constraint failed")
             
             cons_message[pr_id] = {
                     'group'       : metadata['group'],
                     'aln'         : metadata['aln'],
                     'constrained' : final_out
                 }
-
-            ## -------check out ------------------------ ##
-            # with open(final_out, 'r') as f:
-            #     final_out_c = f.read()
-
-            # if not os.path.isfile(check_point_f):
-
-            #     new_entry = {final_out:final_out_c}
-            # else:
-            #     new_entry = self.__load_info__(check_point_f)
-            #     new_entry[final_out] = final_out_c
-
-            # self.__save_obj__(new_entry, check_point_f)
-            ## -------check out ------------------------ ##
-        # remove_files([check_point_f])
-
 
         return cons_message
 
