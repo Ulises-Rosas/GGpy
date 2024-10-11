@@ -12,7 +12,7 @@ Software requierements:
 
 It is advisable to install this package inside a [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) or [python environment](https://docs.python.org/3/library/venv.html) if there are issues with system permissions.
 
-Using `pip`:
+### Option 1: Using `pip`:
 
 
 ```Bash
@@ -20,7 +20,7 @@ pip install numpy # needed for those with python<3.7
 pip install ggi
 ```
 
-Using `git` and `pip` (Optional):
+### Option 2: Using `git` and `pip`:
 
 ```Bash
 git clone https://github.com/Ulises-Rosas/GGpy.git
@@ -55,7 +55,7 @@ optional arguments:
 ### GGI
 
 ```Bash
-ggpy ggi demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees  
+ggpy ggi demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees -c
 cat out_ggi.txt
 ```
 ```
