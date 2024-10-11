@@ -55,7 +55,7 @@ optional arguments:
 ### GGI
 
 ```Bash
-ggpy ggi demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees -c
+ggpy ggi demo/*fasta -t demo/ggi_tax_file.csv -H demo/myhypothesis.trees
 cat out_ggi.txt
 ```
 ```
@@ -76,7 +76,7 @@ Feature extraction from alignments and sequences. List of features can be seen [
 
 
 ```Bash
-ggpy features -A '.fasta' -T '.tree' --path demo/alns_trees
+ggpy features -A '.fasta' -T '.tree' --path demo/alns_trees -c
 cat features_stats.tsv
 ```
 ```
