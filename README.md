@@ -5,7 +5,7 @@ GGI automatization and feature extraction
 Software requierements:
 
 * pip
-* python3
+* python3.7
 
 
 ## Installation
